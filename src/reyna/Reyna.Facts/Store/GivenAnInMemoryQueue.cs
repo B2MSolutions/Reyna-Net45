@@ -2,7 +2,7 @@
 {
     using System;
     using Xunit;
-    using Reyna.Store;
+    using Reyna.Interfaces;
 
     public class GivenAnInMemoryQueue
     {

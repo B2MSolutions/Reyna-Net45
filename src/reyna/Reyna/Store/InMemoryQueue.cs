@@ -1,8 +1,9 @@
-﻿namespace Reyna.Store
+﻿namespace Reyna
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using Reyna.Interfaces;
 
     internal sealed class InMemoryQueue : IRepository
     {

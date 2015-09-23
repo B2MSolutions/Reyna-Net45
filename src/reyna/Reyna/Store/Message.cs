@@ -1,7 +1,8 @@
-﻿namespace Reyna.Store
+﻿namespace Reyna
 {
     using System;
     using System.Net;
+    using Reyna.Interfaces;
 
     public sealed class Message : IMessage
     {

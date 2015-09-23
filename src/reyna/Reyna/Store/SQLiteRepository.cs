@@ -1,5 +1,5 @@
 ﻿
-namespace Reyna.Store
+namespace Reyna
 {
     using System;
     using System.Data.Common;
@@ -8,6 +8,7 @@ namespace Reyna.Store
     using System.Net;
     using System.Reflection;
     using System.Text;
+    using Reyna.Interfaces;
 
     internal sealed class SQLiteRepository : IRepository
     {

@@ -1,7 +1,7 @@
 ﻿
 namespace Reyna.Facts.Store
 {
-    using Reyna.Store;
+    using Reyna.Interfaces;
     using System;
     using Xunit;
 

@@ -5,7 +5,7 @@
     using System.Data.SQLite;
     using System.IO;
     using System.Reflection;
-    using Reyna.Store;
+    using Reyna.Interfaces;
     using Xunit;
 
     public class GivenASQLiteRepository

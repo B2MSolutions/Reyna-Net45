@@ -1,4 +1,4 @@
-﻿namespace Reyna.Store
+﻿namespace Reyna.Interfaces
 {
     using System;
     using System.Net;
