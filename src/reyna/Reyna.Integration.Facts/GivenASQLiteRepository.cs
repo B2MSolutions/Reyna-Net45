@@ -24,8 +24,6 @@
         {
             get 
             {
-                //var assemblyFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
-                //return Path.Combine(assemblyFile.DirectoryName, "reyna.db");
                 return this.Repository.DatabasePath;
             }
         }
@@ -40,7 +38,6 @@
         public void WhenCallingExistsAndDatabaseDoesNotExistShouldReturnFalse()
         {
             File.Delete(this.DatabasePath);
-
             Assert.False(this.Repository.Exists);
         }
 

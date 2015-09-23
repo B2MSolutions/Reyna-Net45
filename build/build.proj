@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
+  <Import Project="$(MSBuildExtensionsPath)\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks"/>
+  <PropertyGroup>
+    <Src>..\Src</Src>
+    <BinaryFilePath>..\Output</BinaryFilePath>
+    <ToolsPath>..\tools\ThirdParty</ToolsPath>
+    <Coverage>..\Coverage</Coverage>
+    <OpenCoverage>$(ToolsPath)\opencover\4.5.1604</OpenCoverage>
+    <xunit>$(ToolsPath)\xunit\2.0.0</xunit>
+    <ReportGenerator>$(ToolsPath)\ReportGenerator\1.8.1.0</ReportGenerator>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <AssemblyInfoFilesToUpdate Include="$(Src)\Reyna\Reyna\Properties\AssemblyInfo.cs"/>
+  </ItemGroup>
+
+  <Target Name="Default" DependsOnTargets="compile"/>
+
+  <Target Name="clean">
+    <Message Text="Cleaning..."/>
+    <MSBuild Projects= "$(Src)\reyna\reyna.sln"  Targets="Clean" />
+  </Target>
+
+  <Target Name="compile" DependsOnTargets="clean">
+    <Message Text="Compiling..."/>
+    <MSBuild Projects= "$(Src)\reyna\reyna.sln"  StopOnFirstFailure="true" Targets="Build" />
+  </Target>
+
+  <Target Name="incrementVersion" Condition="$(BuildNumber) != 0">
+
+    <Attrib Files="@(AssemblyInfoFilesToUpdate)" Normal="true" />
+
+    <!-- Update AssemblyVersion -->
+    <FileUpdate Files="@(AssemblyInfoFilesToUpdate)"
+            Regex="AssemblyVersion\(&quot;.*&quot;\)\]"
+            ReplacementText="AssemblyVersion(&quot;1.0.0.$(BuildNumber)&quot;)]" />
+
+    <!-- Update AssemblyFileVersion -->
+    <FileUpdate Files="@(AssemblyInfoFilesToUpdate)"
+            Regex="AssemblyFileVersion\(&quot;.*&quot;\)\]"
+            ReplacementText="AssemblyFileVersion(&quot;1.0.0.$(BuildNumber)&quot;)]" />
+  </Target>
+  
+</Project>

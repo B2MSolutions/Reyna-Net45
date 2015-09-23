@@ -63,6 +63,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Store\EncryptionChecker.cs" />
+    <Compile Include="Store\IEncryptionChecker.cs" />
     <Compile Include="Store\IMessage.cs" />
     <Compile Include="Store\InMemoryQueue.cs" />
     <Compile Include="Store\IRepository.cs" />
