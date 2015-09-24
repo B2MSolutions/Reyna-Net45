@@ -42,6 +42,18 @@
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Moq, Version=4.2.1507.118, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\packages\Moq.4.2.1507.0118\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
@@ -80,9 +92,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blackout\GivenABlackoutTime.cs" />
+    <Compile Include="Blackout\GivenATime.cs" />
+    <Compile Include="Blackout\GivenATimeRange.cs" />
+    <Compile Include="Connection\GivenAConnectionInfo.cs" />
+    <Compile Include="GivenAUnityHelper.cs" />
+    <Compile Include="Http\GivenAnAcceptAllCertificatePolicy.cs" />
+    <Compile Include="Http\GivenAnHttpStatusCode.cs" />
+    <Compile Include="Power\GivenAPowerManager.cs" />
+    <Compile Include="Preferences\GivenAPreferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\GivenAForwardService.cs" />
+    <Compile Include="Services\GivenANetworkStateService.cs" />
+    <Compile Include="Services\GivenAReynaService.cs" />
+    <Compile Include="Services\GivenAStoreService.cs" />
     <Compile Include="Store\GivenAMessage.cs" />
     <Compile Include="Store\GivenAnInMemoryQueue.cs" />
+    <Compile Include="System\GivenASystemNotifier.cs" />
+    <Compile Include="Threading\GivenANamedWaitHandle.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -94,6 +121,7 @@
       <Name>Reyna</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

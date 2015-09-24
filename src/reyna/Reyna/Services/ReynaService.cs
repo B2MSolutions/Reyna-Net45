@@ -4,6 +4,7 @@
     using System.Net;
     using Microsoft.Win32;
     using Reyna.Interfaces;
+using Microsoft.Practices.Unity;
 
     public sealed class ReynaService : IReyna
     {
@@ -13,12 +14,17 @@
         {
         }
 
-        public ReynaService(byte[] password, ICertificatePolicy certificatePolicy)
+        public ReynaService(byte[] password, ICertificatePolicy certificatePolicy) : this(password, certificatePolicy, UnityHelper.GetContainer())
+        {
+        }
+
+        internal ReynaService(byte[] password, ICertificatePolicy certificatePolicy, IUnityContainer container)
         {
             this.Password = password;
             this.VolatileStore = new InMemoryQueue();
             this.PersistentStore = new SQLiteRepository(password);
-            this.HttpClient = new HttpClient(certificatePolicy);
+            this.HttpClient = container.Resolve<IHttpClient>(new ParameterOverrides{{"CertificatePolicy", certificatePolicy}});
+            
             this.EncryptionChecker = new EncryptionChecker();
 
             this.StoreWaitHandle = new AutoResetEventAdapter(false);
@@ -27,7 +33,7 @@
 
             this.SystemNotifier = new SystemNotifier();
 
-            this.NetworkStateService = new NetworkStateService(this.SystemNotifier, this.NetworkWaitHandle);                       
+            this.NetworkStateService = new NetworkStateService(this.SystemNotifier, this.NetworkWaitHandle);
 
             this.StoreService = new StoreService(this.VolatileStore, this.PersistentStore, this.StoreWaitHandle);
             this.ForwardService = new ForwardService(this.PersistentStore, this.HttpClient, this.NetworkStateService, this.ForwardWaitHandle, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout);            
