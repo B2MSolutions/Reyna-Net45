@@ -1,6 +1,6 @@
 ﻿namespace Reyna.Interfaces
 {
-    internal interface ISystemNotifier
+    public interface ISystemNotifier
     {
         void NotifyOnNetworkConnect(string eventName);
 

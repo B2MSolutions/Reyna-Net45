@@ -90,6 +90,7 @@
     <Compile Include="NativeMethods\NativeMethods.cs" />
     <Compile Include="Power\PowerManager.cs" />
     <Compile Include="Power\SystemPowerStatus.cs" />
+    <Compile Include="Preferences\IPreferences.cs" />
     <Compile Include="Preferences\IRegistry.cs" />
     <Compile Include="Preferences\Preferences.cs" />
     <Compile Include="Preferences\Registry.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Threading\Sleep.cs" />
     <Compile Include="Threading\ThreadWorker.cs" />
     <Compile Include="UnityHelper.cs" />
+    <Compile Include="Utilities\Constants.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

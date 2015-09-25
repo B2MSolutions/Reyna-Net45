@@ -4,7 +4,7 @@
     using System.Text.RegularExpressions;
     using Microsoft.Win32;
 
-    public class Preferences
+    public class Preferences : IPreferences
     {
         private const string SubKey = @"Software\Reyna";
         private const string StorageSizeLimitKeyName = "StorageSizeLimit";
@@ -83,7 +83,7 @@
             }
         }
 
-        internal static int ForwardServiceTemporaryErrorBackout
+        public int ForwardServiceTemporaryErrorBackout
         {
             get
             {
@@ -91,7 +91,7 @@
             }
         }
 
-        internal static int ForwardServiceMessageBackout
+        public int ForwardServiceMessageBackout
         {
             get
             {
@@ -99,7 +99,7 @@
             }
         }
 
-        internal long StorageSizeLimit
+        public long StorageSizeLimit
         {
             get
             {
@@ -221,12 +221,12 @@
             }
         }
 
-        internal void SetStorageSizeLimit(long limit)
+        public void SetStorageSizeLimit(long limit)
         {
             SetRegistryValue(StorageSizeLimitKeyName, limit);
         }
 
-        internal void ResetStorageSizeLimit()
+        public void ResetStorageSizeLimit()
         {
             DeleteRegistryValue(StorageSizeLimitKeyName);
         }

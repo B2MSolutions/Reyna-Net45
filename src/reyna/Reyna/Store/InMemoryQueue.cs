@@ -77,5 +77,7 @@
 
             this.MessageAdded.Invoke(this, new EventArgs());
         }
+
+        public void ShrinkDb(long limit) { }
     }
 }

@@ -4,11 +4,25 @@
     using System.Net;
     using Microsoft.Win32;
     using Reyna.Interfaces;
-using Microsoft.Practices.Unity;
+    using Microsoft.Practices.Unity;
 
     public sealed class ReynaService : IReyna
     {
-        private const long MinimumStorageLimit = 1867776; // 1Mb 800Kb
+        internal const long MinimumStorageLimit = 1867776; // 1Mb 800Kb
+
+        internal IRepository VolatileStore { get; set; }
+        internal IRepository PersistentStore { get; set; }
+        internal IHttpClient HttpClient { get; set; }
+        internal IPreferences Preferences { get; set; }
+        //internal IEncryptionChecker EncryptionChecker { get; set; }
+        internal IService StoreService { get; set; }
+        internal IService ForwardService { get; set; }
+        internal INetworkStateService NetworkStateService { get; set; }
+        internal IWaitHandle StoreWaitHandle { get; set; }
+        internal IWaitHandle ForwardWaitHandle { get; set; }
+        internal IWaitHandle NetworkWaitHandle { get; set; }
+        internal ISystemNotifier SystemNotifier { get; set; }
+        //private byte[] Password { get; set; }
 
         public ReynaService() : this(null, null)
         {
@@ -20,116 +34,141 @@ using Microsoft.Practices.Unity;
 
         internal ReynaService(byte[] password, ICertificatePolicy certificatePolicy, IUnityContainer container)
         {
-            this.Password = password;
-            this.VolatileStore = new InMemoryQueue();
-            this.PersistentStore = new SQLiteRepository(password);
-            this.HttpClient = container.Resolve<IHttpClient>(new ParameterOverrides{{"CertificatePolicy", certificatePolicy}});
+            this.HttpClient = container.Resolve<IHttpClient>();
+            this.Preferences = container.Resolve<IPreferences>();
+            this.VolatileStore = container.Resolve<IRepository>(Constants.Injection.VOLATILE_STORE);
+            this.PersistentStore = container.Resolve<IRepository>(Constants.Injection.SQLITE_STORE);
+            this.SystemNotifier = container.Resolve<ISystemNotifier>();
+
+            this.NetworkWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE,
+                new ResolverOverride[]
+                                   {
+                                       new ParameterOverride("initialState", false), 
+                                       new ParameterOverride("name", Reyna.NetworkStateService.NetworkConnectedNamedEvent)
+                                   });
             
-            this.EncryptionChecker = new EncryptionChecker();
+            this.NetworkStateService = container.Resolve<INetworkStateService>(
+                new ResolverOverride[]
+                                   {
+                                       new ParameterOverride("systemNotifier", this.SystemNotifier), 
+                                       new ParameterOverride("networkWaitHandle",this.NetworkWaitHandle)
+                                   });
 
-            this.StoreWaitHandle = new AutoResetEventAdapter(false);
-            this.ForwardWaitHandle = new AutoResetEventAdapter(false);
-            this.NetworkWaitHandle = new NamedWaitHandle(false, Reyna.NetworkStateService.NetworkConnectedNamedEvent);
+            this.StoreWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE,
+                new ResolverOverride[]
+                                    { 
+                                        new ParameterOverride("initialState", false)
+                                    });
 
-            this.SystemNotifier = new SystemNotifier();
 
-            this.NetworkStateService = new NetworkStateService(this.SystemNotifier, this.NetworkWaitHandle);
+            this.ForwardWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE,
+                new ResolverOverride[]
+                                    { 
+                                        new ParameterOverride("initialState", false)
+                                    });
 
-            this.StoreService = new StoreService(this.VolatileStore, this.PersistentStore, this.StoreWaitHandle);
-            this.ForwardService = new ForwardService(this.PersistentStore, this.HttpClient, this.NetworkStateService, this.ForwardWaitHandle, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout);            
-        }
+            this.ForwardWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE,
+                new ResolverOverride[]
+                                    { 
+                                        new ParameterOverride("initialState", false)
+                                    });
 
-        public static long StorageSizeLimit
-        {
-            get
+            this.StoreService = container.Resolve<IService>(Constants.Injection.STORE_SERVICE,
+                new ResolverOverride[]
+                                    {
+                                        new ParameterOverride("sourceStore", this.VolatileStore),
+                                        new ParameterOverride("tagetStore", this.PersistentStore),
+                                        new ParameterOverride("waitHandle", this.StoreWaitHandle)
+                                    });
+
+            this.ForwardService = container.Resolve<IService>(Constants.Injection.FORWARD_SERVICE,
+                new ResolverOverride[]
+                                    {
+                                        new ParameterOverride("sourceStore", this.PersistentStore),
+                                        new ParameterOverride("httpClient", this.HttpClient),
+                                        new ParameterOverride("networkState", this.NetworkStateService),
+                                        new ParameterOverride("waitHandle", this.ForwardWaitHandle),
+                                        new ParameterOverride("temporaryErrorMilliseconds", this.Preferences.ForwardServiceTemporaryErrorBackout),
+                                        new ParameterOverride("sleepMilliseconds", Preferences.ForwardServiceMessageBackout)
+                                    });
+            
+            //this.Password = password;
+
+
+            //this.EncryptionChecker = new EncryptionChecker();
+            
+            if (certificatePolicy != null)
             {
-                return new Preferences().StorageSizeLimit;
+                this.HttpClient.SetCertificatePolicy(certificatePolicy);
             }
         }
 
-        internal IEncryptionChecker EncryptionChecker { get; set; }
+        public long StorageSizeLimit
+        {
+            get
+            {
+                return this.Preferences.StorageSizeLimit;
+            }
+        }
 
-        internal IRepository VolatileStore { get; set; }
-
-        internal IRepository PersistentStore { get; set; }
-
-        internal IHttpClient HttpClient { get; set; }
-
-        internal IService StoreService { get; set; }
-
-        internal IService ForwardService { get; set; }
-
-        internal INetworkStateService NetworkStateService { get; set; }
-
-        internal IWaitHandle StoreWaitHandle { get; set; }
-
-        internal IWaitHandle ForwardWaitHandle { get; set; }
-
-        internal IWaitHandle NetworkWaitHandle { get; set; }
-
-        internal ISystemNotifier SystemNotifier { get; set; }
-
-        private byte[] Password { get; set; }
-
-        public static void SetStorageSizeLimit(byte[] password, long limit)
+        public void SetStorageSizeLimit(long limit)
         {
             limit = limit < MinimumStorageLimit ? MinimumStorageLimit : limit;
-            new Preferences().SetStorageSizeLimit(limit);
+            this.Preferences.SetStorageSizeLimit(limit);
 
-            var repository = new SQLiteRepository(password);
-            repository.Initialise();
-            repository.ShrinkDb(limit);
+            this.PersistentStore.Initialise();
+            this.PersistentStore.ShrinkDb(limit);
         }
 
-        public static void ResetStorageSizeLimit()
+        internal void ResetStorageSizeLimit()
         {
-            new Preferences().ResetStorageSizeLimit();
+            this.Preferences.ResetStorageSizeLimit();
         }
 
-        public static void SetCellularDataBlackout(TimeRange timeRange)
+        public void SetCellularDataBlackout(TimeRange timeRange)
         {
-            new Preferences().SetCellularDataBlackout(timeRange);
+            this.Preferences.SetCellularDataBlackout(timeRange);
         }
 
-        public static void ResetCellularDataBlackout()
+        public void ResetCellularDataBlackout()
         {
-            new Preferences().ResetCellularDataBlackout();
+            this.Preferences.ResetCellularDataBlackout();
         }
 
-        public static void SetWlanBlackoutRange(string range)
+        public void SetWlanBlackoutRange(string range)
         {
-            new Preferences().SetWlanBlackoutRange(range);
+            this.Preferences.SetWlanBlackoutRange(range);
         }
 
-        public static void SetWwanBlackoutRange(string range)
+        public void SetWwanBlackoutRange(string range)
         {
-            new Preferences().SetWwanBlackoutRange(range);
+            this.Preferences.SetWwanBlackoutRange(range);
         }
 
-        public static void SetRoamingBlackout(bool value)
+        public void SetRoamingBlackout(bool value)
         {
-            new Preferences().SetRoamingBlackout(value);
+            this.Preferences.SetRoamingBlackout(value);
         }
 
-        public static void SetOnChargeBlackout(bool value)
+        public void SetOnChargeBlackout(bool value)
         {
-            new Preferences().SetOnChargeBlackout(value);
+            this.Preferences.SetOnChargeBlackout(value);
         }
 
-        public static void SetOffChargeBlackout(bool value)
+        public void SetOffChargeBlackout(bool value)
         {
-            new Preferences().SetOffChargeBlackout(value);
+            this.Preferences.SetOffChargeBlackout(value);
         }
 
         public void Start()
         {
-            if (this.Password != null && this.Password.Length > 0)
-            {
-                if (!this.EncryptionChecker.DbEncrypted())
-                {
-                    this.EncryptionChecker.EncryptDb(this.Password);
-                }
-            }
+        //    if (this.Password != null && this.Password.Length > 0)
+        //    {
+        //        if (!this.EncryptionChecker.DbEncrypted())
+        //        {
+        //            this.EncryptionChecker.EncryptDb(this.Password);
+        //        }
+        //    }
 
             this.StoreService.Start();
             this.ForwardService.Start();
@@ -145,7 +184,7 @@ using Microsoft.Practices.Unity;
 
         public void Put(IMessage message)
         {
-            this.VolatileStore.Add(message);
+        //    this.VolatileStore.Add(message);
         }
 
         public void Dispose()

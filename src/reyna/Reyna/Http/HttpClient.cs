@@ -10,7 +10,11 @@
 
     public sealed class HttpClient : IHttpClient
     {
-        public HttpClient(ICertificatePolicy certificatePolicy)
+        public HttpClient()
+        {
+        }
+
+        public void SetCertificatePolicy(ICertificatePolicy certificatePolicy)
         {
             if (certificatePolicy != null)
             {

@@ -1,6 +1,6 @@
 ﻿namespace Reyna.Interfaces
 {
-    internal interface IWaitHandle
+    public interface IWaitHandle
     {
         bool Set();
 

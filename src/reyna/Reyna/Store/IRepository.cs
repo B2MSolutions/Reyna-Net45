@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal interface IRepository
+    public interface IRepository
     {
         event EventHandler<EventArgs> MessageAdded;
 
@@ -15,5 +15,7 @@
         IMessage Get();
 
         IMessage Remove();
+
+        void ShrinkDb(long limit);
     }
 }

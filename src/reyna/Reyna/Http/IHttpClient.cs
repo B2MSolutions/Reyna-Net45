@@ -2,8 +2,9 @@
 {
     using System.Net;
 
-    internal interface IHttpClient
+    public interface IHttpClient
     {
         Result Post(IMessage message);
+        void SetCertificatePolicy(ICertificatePolicy certificatePolicy);
     }
 }
