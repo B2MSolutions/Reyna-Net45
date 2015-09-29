@@ -8,6 +8,8 @@
     using Xunit.Extensions;
     using Microsoft.Practices.Unity;
     using System.Net;
+    using System.Text;
+    using System.Linq;
 
     public class GivenAReynaService
     {
@@ -25,6 +27,7 @@
         private Mock<INetworkStateService> networkStateService;
         private Mock<IWaitHandle> forwardWaitHandle;
         private Mock<IWaitHandle> storeWaitHandle;
+        private Mock<IEncryptionChecker> encryptionChecker;
 
         public GivenAReynaService()
         {
@@ -40,6 +43,7 @@
             this.storeWaitHandle = this.unity.mockStoreWaitHandle;
             this.storeService = this.unity.mockStoreService;
             this.forwardService = this.unity.mockForwardService;
+            this.encryptionChecker = this.unity.mockEncryptionChecker;
         }
 
         [Fact]
@@ -56,6 +60,7 @@
             Assert.Same(this.storeWaitHandle.Object, this.service.StoreWaitHandle);
             Assert.Same(this.storeService.Object, this.service.StoreService);
             Assert.Same(this.forwardService.Object, this.service.ForwardService);
+            Assert.Same(this.encryptionChecker.Object, this.service.EncryptionChecker);
         }
 
         [Theory]
@@ -217,241 +222,89 @@
             helper.mockNetworkStateService.Verify(s => s.Dispose(), Times.Never);
         }
 
-        //[Fact]
-        //public void WhenConstructingAndReceivedPasswordShouldPassPasswordToSQLiteRepository()
-        //{
-        //    var password = new byte[] { 0xFF, 0xAA, 0xCC, 0xCC };
-        //    var reynaService = new ReynaService(password, null);
+        [Fact]
+        public void WhenConstructingWithAPasswordPasswordFieldShouldBeSet()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("password");
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            ReynaService service = new ReynaService(bytes, null, container);
+            Assert.True(bytes.SequenceEqual(service.Password));
+        }
 
-        //    Assert.Equal(password, ((SQLiteRepository)reynaService.PersistentStore).Password); 
-        //}
+        [Fact]
+        public void WhenCallingStartAndPasswordIsSetAndDbIsNotEncryptedShouldEncryptDbUsingPassword()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            byte[] bytes = Encoding.ASCII.GetBytes("password");
+            ReynaService service = new ReynaService(bytes, null, container);
+            helper.mockEncryptionChecker.Setup(m => m.DbEncrypted()).Returns(false);
 
-        //[Fact]
-        //public void WhenConstructingWithoutPasswordShouldNotPassAnyPasswordToSQLiteRepository()
-        //{
-        //    var reynaService = new ReynaService();
+            service.Start();
 
-        //    Assert.Null(((SQLiteRepository)reynaService.PersistentStore).Password);
-        //}
+            helper.mockEncryptionChecker.Verify(m => m.EncryptDb(bytes), Times.Exactly(1));
+        }
 
-        //[Fact]
-        //public void WhenCallingPutShouldAddMessage()
-        //{
-        //    this.VolatileStore.Setup(r => r.Add(It.IsAny<IMessage>()));
+        [Fact]
+        public void WhenCallingStartAndPasswordIsSetAndDbIsEncryptedShouldNotEncryptDb()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            byte[] bytes = Encoding.ASCII.GetBytes("password");
+            ReynaService service = new ReynaService(bytes, null, container);
+            helper.mockEncryptionChecker.Setup(m => m.DbEncrypted()).Returns(true);
 
-        //    var message = new Message(null, null);
-        //    this.ReynaService.Put(message);
+            service.Start();
 
-        //    this.VolatileStore.Verify(r => r.Add(message), Times.Once());
-        //}
+            helper.mockEncryptionChecker.Verify(m => m.EncryptDb(bytes), Times.Never);
+        }
 
-        //[Fact]
-        //public void WhenCallingStartShouldStartStoreService()
-        //{
-        //    this.StoreService.Setup(s => s.Start());
-        //    this.ForwardService.Setup(f => f.Start());
-        //    this.NetworkStateService.Setup(f => f.Start());
+        [Fact]
+        public void WhenCallingStartAndPasswordIsNotSetAndShouldNotEncryptDb()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            ReynaService service = new ReynaService(null, null, container);
 
-        //    this.ReynaService.Start();
+            service.Start();
 
-        //    this.StoreService.Verify(s => s.Start(), Times.Once());
-        //    this.ForwardService.Verify(f => f.Start(), Times.Once());
-        //    this.NetworkStateService.Verify(f => f.Start(), Times.Once());
-        //}
+            helper.mockEncryptionChecker.Verify(m => m.DbEncrypted(), Times.Never);
+        }
 
-        //[Fact]
-        //public void WhenCallingStopShouldStopStoreService()
-        //{
-        //    this.StoreService.Setup(s => s.Stop());
-        //    this.ForwardService.Setup(f => f.Stop());
-        //    this.NetworkStateService.Setup(f => f.Stop());
+        [Fact]
+        public void WhenCallingPutShouldCallVolatileStore()
+        {
+            IMessage message = new Message(new System.Uri("http://testuri.com"), "body");
+            this.service.Put(message);
+            this.volatileStore.Verify(s => s.Add(message), Times.Exactly(1));
+        }
 
-        //    this.ReynaService.Stop();
+        [Fact]
+        public void WhenConstructingWithAPasswordShouldSetPasswordOnSecureStore()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            byte[] bytes = Encoding.ASCII.GetBytes("password");
 
-        //    this.StoreService.Verify(s => s.Stop(), Times.Once());
-        //    this.ForwardService.Verify(f => f.Stop(), Times.Once());
-        //    this.NetworkStateService.Verify(f => f.Stop(), Times.Once());
-        //}
+            helper.mockSqlStore.SetupSet(s => s.Password = bytes).Verifiable();
 
-        //[Fact]
-        //public void WhenCallingDisposeShouldCallDisposeOnStoreService()
-        //{
-        //    this.StoreService.Setup(s => s.Dispose());
-        //    this.ForwardService.Setup(s => s.Dispose());
-        //    this.NetworkStateService.Setup(s => s.Dispose());
+            ReynaService service = new ReynaService(bytes, null, container);
 
-        //    this.ReynaService.Dispose();
+            helper.mockSqlStore.VerifySet(s => s.Password=bytes, Times.Exactly(1));
+        }
 
-        //    this.StoreService.Verify(s => s.Dispose(), Times.Once());
-        //    this.ForwardService.Verify(f => f.Dispose(), Times.Once());
-        //    this.NetworkStateService.Verify(f => f.Dispose(), Times.Once());
-        //}
+        [Fact]
+        public void WhenConstructingWithoutAPasswordShouldnotSetPasswordOnSecureStore()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
 
-        //[Fact]
-        //public void WhenGettingForwardServiceTemporaryErrorBackoutAndNoRegistryKeyShouldReturnDefault5Minutes()
-        //{
-        //    Assert.Equal(300000, Preferences.ForwardServiceTemporaryErrorBackout);
-        //}
+            helper.mockSqlStore.SetupSet(s => s.Password = It.IsAny<byte[]>()).Verifiable();
 
-        //[Fact]
-        //public void WhenGettingForwardServiceTemporaryErrorBackoutAndRegistryKeyExistsShouldReturnExpected()
-        //{
-        //    using (var key = Registry.LocalMachine.CreateSubKey(@"Software\Reyna"))
-        //    {
-        //        key.SetValue("TemporaryErrorBackout", 100);
-        //    }
+            ReynaService service = new ReynaService(null, null, container);
 
-        //    Assert.Equal(100, Preferences.ForwardServiceTemporaryErrorBackout);
-
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-        //}
-
-        //[Fact]
-        //public void WhenGettingForwardServiceMessageBackoutAndNoRegistryKeyShouldReturnDefault5Minutes()
-        //{
-        //    Assert.Equal(1000, Preferences.ForwardServiceMessageBackout);
-        //}
-
-        //[Fact]
-        //public void WhenGettingForwardServiceMessageBackoutAndRegistryKeyExistsShouldReturnExpected()
-        //{
-        //    using (var key = Registry.LocalMachine.CreateSubKey(@"Software\Reyna"))
-        //    {
-        //        key.SetValue("MessageBackout", 10);
-        //    }
-
-        //    Assert.Equal(10, Preferences.ForwardServiceMessageBackout);
-
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-        //}
-
-        //[Fact]
-        //public void WhenSettingStorageLimitShouldSaveStorageLimit()
-        //{
-        //    ReynaService.SetStorageSizeLimit(null, 3145728);
-        //    Assert.Equal(3145728, ReynaService.StorageSizeLimit);
-
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-        //}
-
-        //[Fact]
-        //public void WhenGettingStorageLimitShouldSaveStorageLimit()
-        //{
-        //    ReynaService.SetStorageSizeLimit(null, 3145728);
-        //    Assert.Equal(3145728, ReynaService.StorageSizeLimit);
-
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-        //}
-
-        //[Fact]
-        //public void WhenSettingStorageLimitShouldInitializeReyna()
-        //{
-        //    File.Delete("reyna.db");
-        //    ReynaService.SetStorageSizeLimit(null, 3145728);
-        //    Assert.True(File.Exists("reyna.db"));
-        //}
-        
-        //[Theory]
-        //[InlineData(-42)]
-        //[InlineData(0)]
-        //[InlineData(42)]
-        //public void WhenSettingStorageLimitShouldSetToMinimumValue(long value) 
-        //{
-        //    ReynaService.SetStorageSizeLimit(null, value);
-        //    Assert.Equal(1867776, ReynaService.StorageSizeLimit); // 1867776 - min value, 1.8 Mb
-
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-        //}
-        
-        //[Fact]
-        //public void WhenResettingsStorageLimitShouldDeleteIt()
-        //{
-        //    ReynaService.SetStorageSizeLimit(null, 100);
-        //    ReynaService.ResetStorageSizeLimit();
-        //    Assert.Equal(-1, ReynaService.StorageSizeLimit);
-        //}
-
-        //[Fact]
-        //public void WhenResettingsStorageLimitAndRegistryKeyNotExistsShouldNotThrows()
-        //{
-        //    Registry.LocalMachine.DeleteSubKey(@"Software\Reyna", false);
-            
-        //    ReynaService.ResetStorageSizeLimit();
-        //}
-
-        //[Fact]
-        //public void WhenSetCellularDataBlackoutShouldStoreIt()
-        //{
-        //    TimeRange range = new TimeRange(new Time(11, 00), new Time(12, 01));
-        //    ReynaService.SetCellularDataBlackout(range);
-
-        //    TimeRange timeRange = new Preferences().CellularDataBlackout;
-
-        //    Assert.Equal(range.From.MinuteOfDay, timeRange.From.MinuteOfDay);
-        //    Assert.Equal(range.To.MinuteOfDay, timeRange.To.MinuteOfDay);
-        //}
-
-        //[Fact]
-        //public void WhenResetCellularDataBlackoutThenGetCellularDataBlackoutShouldReturnNull()
-        //{
-        //    TimeRange range = new TimeRange(new Time(11, 00), new Time(12, 01));
-        //    ReynaService.ResetCellularDataBlackout();
-
-        //    TimeRange timeRange = new Preferences().CellularDataBlackout;
-
-        //    Assert.Null(timeRange);
-        //}
-
-        //[Fact]
-        //public void WhenSetWlanBlackoutRangeShouldStoreIt()
-        //{
-        //    string range = "00:00-00:10";
-        //    ReynaService.SetWlanBlackoutRange(range);
-
-        //    string actual = new Preferences().WlanBlackoutRange;
-
-        //    Assert.Equal(range, actual);
-        //}
-
-        //[Fact]
-        //public void WhenSetWwanBlackoutRangeShouldStoreIt()
-        //{
-        //    string range = "00:00-00:10";
-        //    ReynaService.SetWwanBlackoutRange(range);
-
-        //    string actual = new Preferences().WwanBlackoutRange;
-
-        //    Assert.Equal(range, actual);
-        //}
-
-        //[Fact]
-        //public void WhenSetRoamingBlackoutShouldStoreIt()
-        //{
-        //    ReynaService.SetRoamingBlackout(false);
-
-        //    bool actual = new Preferences().RoamingBlackout;
-
-        //    Assert.False(actual);
-        //}
-
-        //[Fact]
-        //public void WhenSetOnChargeBlackoutShouldStoreIt()
-        //{
-        //    ReynaService.SetOnChargeBlackout(false);
-
-        //    bool actual = new Preferences().OnChargeBlackout;
-
-        //    Assert.False(actual);
-        //}
-
-        //[Fact]
-        //public void WhenSetOffChargeBlackoutShouldStoreIt()
-        //{
-        //    ReynaService.SetOffChargeBlackout(false);
-
-        //    bool actual = new Preferences().OffChargeBlackout;
-
-        //    Assert.False(actual);
-        //}
+            helper.mockSqlStore.VerifySet(s => s.Password = It.IsAny<byte[]>(), Times.Never);
+        }
     }
 }

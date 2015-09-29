@@ -54,7 +54,7 @@ namespace Reyna
             }
         }
 
-        internal byte[] Password { get; set; }
+        public byte[] Password { get; set; }
 
         public string DatabasePath
         {

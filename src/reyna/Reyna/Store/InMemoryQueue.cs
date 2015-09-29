@@ -7,6 +7,8 @@
 
     internal sealed class InMemoryQueue : IRepository
     {
+        public byte[] Password{ get; set; }
+
         private Queue<IMessage> queue;
 
         public InMemoryQueue()

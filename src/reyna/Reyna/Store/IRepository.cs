@@ -17,5 +17,7 @@
         IMessage Remove();
 
         void ShrinkDb(long limit);
+
+        byte[] Password { get; set;}
     }
 }

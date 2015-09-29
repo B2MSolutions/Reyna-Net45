@@ -14,7 +14,7 @@
         internal IRepository PersistentStore { get; set; }
         internal IHttpClient HttpClient { get; set; }
         internal IPreferences Preferences { get; set; }
-        //internal IEncryptionChecker EncryptionChecker { get; set; }
+        internal IEncryptionChecker EncryptionChecker { get; set; }
         internal IService StoreService { get; set; }
         internal IService ForwardService { get; set; }
         internal INetworkStateService NetworkStateService { get; set; }
@@ -22,7 +22,7 @@
         internal IWaitHandle ForwardWaitHandle { get; set; }
         internal IWaitHandle NetworkWaitHandle { get; set; }
         internal ISystemNotifier SystemNotifier { get; set; }
-        //private byte[] Password { get; set; }
+        internal byte[] Password { get; set; }
 
         public ReynaService() : this(null, null)
         {
@@ -92,11 +92,14 @@
                                         new ParameterOverride("sleepMilliseconds", Preferences.ForwardServiceMessageBackout)
                                     });
             
-            //this.Password = password;
+            this.Password = password;
 
+            if (password != null)
+            {
+                this.PersistentStore.Password = password;
+            }
 
-            //this.EncryptionChecker = new EncryptionChecker();
-            
+            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();            
             if (certificatePolicy != null)
             {
                 this.HttpClient.SetCertificatePolicy(certificatePolicy);
@@ -162,13 +165,13 @@
 
         public void Start()
         {
-        //    if (this.Password != null && this.Password.Length > 0)
-        //    {
-        //        if (!this.EncryptionChecker.DbEncrypted())
-        //        {
-        //            this.EncryptionChecker.EncryptDb(this.Password);
-        //        }
-        //    }
+            if (this.Password != null && this.Password.Length > 0)
+            {
+                if (!this.EncryptionChecker.DbEncrypted())
+                {
+                    this.EncryptionChecker.EncryptDb(this.Password);
+                }
+            }
 
             this.StoreService.Start();
             this.ForwardService.Start();
@@ -184,7 +187,7 @@
 
         public void Put(IMessage message)
         {
-        //    this.VolatileStore.Add(message);
+            this.VolatileStore.Add(message);
         }
 
         public void Dispose()

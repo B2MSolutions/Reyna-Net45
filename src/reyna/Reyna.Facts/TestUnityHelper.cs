@@ -23,6 +23,7 @@
         public Mock<IWaitHandle> mockStoreWaitHandle = new Mock<IWaitHandle>();
         public Mock<IService> mockStoreService = new Mock<IService>();
         public Mock<IService> mockForwardService = new Mock<IService>();
+        public Mock<IEncryptionChecker> mockEncryptionChecker = new Mock<IEncryptionChecker>();
 
         public IUnityContainer GetContainer()
         {
@@ -39,6 +40,7 @@
             container.RegisterInstance<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE, this.mockStoreWaitHandle.Object);
             container.RegisterInstance<IService>(Constants.Injection.STORE_SERVICE, this.mockStoreService.Object);
             container.RegisterInstance<IService>(Constants.Injection.FORWARD_SERVICE, this.mockForwardService.Object);
+            container.RegisterInstance<IEncryptionChecker>(this.mockEncryptionChecker.Object);
 
             return container;
         }

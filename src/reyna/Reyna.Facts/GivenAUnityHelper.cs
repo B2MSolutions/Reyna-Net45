@@ -34,6 +34,7 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IWaitHandle) && r.Name == Constants.Injection.STORE_WAIT_HANDLE && r.MappedToType == typeof(AutoResetEventAdapter)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IService) && r.Name == Constants.Injection.STORE_SERVICE && r.MappedToType == typeof(StoreService)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IService) && r.Name == Constants.Injection.FORWARD_SERVICE && r.MappedToType == typeof(ForwardService)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IEncryptionChecker) && r.MappedToType == typeof(EncryptionChecker)));
         }
     }
 }

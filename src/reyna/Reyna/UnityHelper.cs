@@ -25,6 +25,7 @@
             container.RegisterType<IWaitHandle, AutoResetEventAdapter>(Constants.Injection.STORE_WAIT_HANDLE);
             container.RegisterType<IService, StoreService>(Constants.Injection.STORE_SERVICE);
             container.RegisterType<IService, ForwardService>(Constants.Injection.FORWARD_SERVICE);
+            container.RegisterType<IEncryptionChecker, EncryptionChecker>();
 
             return container;
         }
