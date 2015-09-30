@@ -51,7 +51,7 @@
                 new ResolverOverride[]
                                    {
                                        new ParameterOverride("systemNotifier", this.SystemNotifier), 
-                                       new ParameterOverride("networkWaitHandle",this.NetworkWaitHandle)
+                                       new ParameterOverride("waitHandle",this.NetworkWaitHandle)
                                    });
 
             this.StoreWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE,
@@ -77,7 +77,7 @@
                 new ResolverOverride[]
                                     {
                                         new ParameterOverride("sourceStore", this.VolatileStore),
-                                        new ParameterOverride("tagetStore", this.PersistentStore),
+                                        new ParameterOverride("targetStore", this.PersistentStore),
                                         new ParameterOverride("waitHandle", this.StoreWaitHandle)
                                     });
 

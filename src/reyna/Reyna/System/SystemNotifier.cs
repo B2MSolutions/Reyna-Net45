@@ -30,12 +30,12 @@
     {
         public void NotifyOnNetworkConnect(string eventName)
         {
-            throw new NotImplementedException();
+ //           throw new NotImplementedException();
         }
 
         public void ClearNotification(string eventName)
         {
-            throw new NotImplementedException();
+ //           throw new NotImplementedException();
         }
     }
 }
