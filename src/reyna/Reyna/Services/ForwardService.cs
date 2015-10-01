@@ -55,7 +55,7 @@
 
                     if (result == Result.Blackout || result == Result.NotConnected)
                     {
-                        return;
+                        break;
                     }
 
                     this.SourceStore.Remove();

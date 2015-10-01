@@ -18,7 +18,6 @@
         public Mock<IRepository> mockSqlStore = new Mock<IRepository>();
         public Mock<INetworkStateService> mockNetworkStateService = new Mock<INetworkStateService>();
         public Mock<IWaitHandle> mockNetworkWaitHandle = new Mock<IWaitHandle>();
-        public Mock<ISystemNotifier> mockSystemNotifier = new Mock<ISystemNotifier>();
         public Mock<IWaitHandle> mockForwardWaitHandle = new Mock<IWaitHandle>();
         public Mock<IWaitHandle> mockStoreWaitHandle = new Mock<IWaitHandle>();
         public Mock<IService> mockStoreService = new Mock<IService>();
@@ -35,7 +34,6 @@
             container.RegisterInstance <IRepository>(Constants.Injection.SQLITE_STORE, this.mockSqlStore.Object);
             container.RegisterInstance<INetworkStateService>(this.mockNetworkStateService.Object);
             container.RegisterInstance<IWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE, this.mockNetworkWaitHandle.Object);
-            container.RegisterInstance<ISystemNotifier>(this.mockSystemNotifier.Object);
             container.RegisterInstance<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE, this.mockForwardWaitHandle.Object);
             container.RegisterInstance<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE, this.mockStoreWaitHandle.Object);
             container.RegisterInstance<IService>(Constants.Injection.STORE_SERVICE, this.mockStoreService.Object);

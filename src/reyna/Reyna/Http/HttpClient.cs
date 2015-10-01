@@ -81,6 +81,7 @@
             {
                 var contentBytes = Encoding.UTF8.GetBytes(content);
                 request.ContentLength = contentBytes.Length;
+
                 using (var stream = request.GetRequestStream())
                 {
                     stream.Write(contentBytes, 0, contentBytes.Length);

@@ -110,8 +110,6 @@
     <Compile Include="Store\IRepository.cs" />
     <Compile Include="Store\Message.cs" />
     <Compile Include="Store\SQLiteRepository.cs" />
-    <Compile Include="System\ISystemNotifier.cs" />
-    <Compile Include="System\SystemNotifier.cs" />
     <Compile Include="Threading\AutoResetEventAdapter.cs" />
     <Compile Include="Threading\IWaitHandle.cs" />
     <Compile Include="Threading\NamedWaitHandle.cs" />

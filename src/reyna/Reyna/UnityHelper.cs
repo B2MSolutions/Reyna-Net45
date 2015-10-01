@@ -20,7 +20,6 @@
             container.RegisterType<IRepository, InMemoryQueue>(Constants.Injection.VOLATILE_STORE);
             container.RegisterType<INetworkStateService, NetworkStateService>();
             container.RegisterType<IWaitHandle, NamedWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE);
-            container.RegisterType<ISystemNotifier, SystemNotifier>();
             container.RegisterType<IWaitHandle, AutoResetEventAdapter>(Constants.Injection.FORWARD_WAIT_HANDLE);
             container.RegisterType<IWaitHandle, AutoResetEventAdapter>(Constants.Injection.STORE_WAIT_HANDLE);
             container.RegisterType<IService, StoreService>(Constants.Injection.STORE_SERVICE);

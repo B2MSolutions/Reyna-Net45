@@ -10,7 +10,7 @@
             for (int i = 0; i < seconds; i++)
             {
                 Thread.Sleep(1 * 1000);
-                NativeMethods.SystemIdleTimerReset();
+                //NativeMethods.SystemIdleTimerReset();
             }
         }
 

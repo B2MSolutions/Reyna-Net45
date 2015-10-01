@@ -21,7 +21,6 @@
         internal IWaitHandle StoreWaitHandle { get; set; }
         internal IWaitHandle ForwardWaitHandle { get; set; }
         internal IWaitHandle NetworkWaitHandle { get; set; }
-        internal ISystemNotifier SystemNotifier { get; set; }
         internal byte[] Password { get; set; }
 
         public ReynaService() : this(null, null)
@@ -38,7 +37,6 @@
             this.Preferences = container.Resolve<IPreferences>();
             this.VolatileStore = container.Resolve<IRepository>(Constants.Injection.VOLATILE_STORE);
             this.PersistentStore = container.Resolve<IRepository>(Constants.Injection.SQLITE_STORE);
-            this.SystemNotifier = container.Resolve<ISystemNotifier>();
 
             this.NetworkWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE,
                 new ResolverOverride[]
@@ -50,7 +48,6 @@
             this.NetworkStateService = container.Resolve<INetworkStateService>(
                 new ResolverOverride[]
                                    {
-                                       new ParameterOverride("systemNotifier", this.SystemNotifier), 
                                        new ParameterOverride("waitHandle",this.NetworkWaitHandle)
                                    });
 
@@ -60,12 +57,6 @@
                                         new ParameterOverride("initialState", false)
                                     });
 
-
-            this.ForwardWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE,
-                new ResolverOverride[]
-                                    { 
-                                        new ParameterOverride("initialState", false)
-                                    });
 
             this.ForwardWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE,
                 new ResolverOverride[]

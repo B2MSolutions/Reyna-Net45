@@ -22,7 +22,6 @@
         private Mock<IPreferences> preferences;
         private Mock<IService> storeService; 
         private Mock<IService> forwardService; 
-        private Mock<ISystemNotifier> systemNotifier;
         private Mock<IWaitHandle> networkWaitHandle;
         private Mock<INetworkStateService> networkStateService;
         private Mock<IWaitHandle> forwardWaitHandle;
@@ -36,7 +35,6 @@
             this.preferences = this.unity.mockPreferences;
             this.persistentStore = this.unity.mockSqlStore;
             this.volatileStore = this.unity.mockVolatileStore;
-            this.systemNotifier = this.unity.mockSystemNotifier;
             this.networkWaitHandle = this.unity.mockNetworkWaitHandle;
             this.networkStateService = this.unity.mockNetworkStateService;
             this.forwardWaitHandle = this.unity.mockForwardWaitHandle;
@@ -53,7 +51,6 @@
             Assert.Same(this.preferences.Object, this.service.Preferences);
             Assert.Same(this.volatileStore.Object, this.service.VolatileStore);
             Assert.Same(this.persistentStore.Object, this.service.PersistentStore);
-            Assert.Same(this.systemNotifier.Object, this.service.SystemNotifier);
             Assert.Same(this.networkWaitHandle.Object, this.service.NetworkWaitHandle);
             Assert.Same(this.networkStateService.Object, this.service.NetworkStateService);
             Assert.Same(this.forwardWaitHandle.Object, this.service.ForwardWaitHandle);

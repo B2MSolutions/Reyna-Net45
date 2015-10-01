@@ -9,13 +9,12 @@
     {
         public GivenANetworkStateService()
         {
-            this.SystemNotifier = new Mock<ISystemNotifier>();
+
             this.WaitHandle = new AutoResetEventAdapter(false);
 
-            this.NetworkStateService = new NetworkStateService(this.SystemNotifier.Object, this.WaitHandle);
+            this.NetworkStateService = new NetworkStateService(this.WaitHandle);
         }
 
-        private Mock<ISystemNotifier> SystemNotifier { get; set; }
 
         private IWaitHandle WaitHandle { get; set; }
 
@@ -30,47 +29,18 @@
         [Fact]
         public void WhenConstructingWithAllNullParametersShouldThrow()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new NetworkStateService(null, null));
+            var exception = Assert.Throws<ArgumentNullException>(() => new NetworkStateService(null));
             Assert.Equal("waitHandle", exception.ParamName);
-        }
-
-        [Fact]
-        public void WhenConstructingAndSystemNotifierIsNullParametersShouldThrow()
-        {
-            var exception = Assert.Throws<ArgumentNullException>(() => new NetworkStateService(null, this.WaitHandle));
-            Assert.Equal("systemNotifier", exception.ParamName);
         }
 
         [Fact]
         public void WhenConstructingAndWaitHandleIsNullParametersShouldThrow()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new NetworkStateService(this.SystemNotifier.Object, null));
+            var exception = Assert.Throws<ArgumentNullException>(() => new NetworkStateService(null));
             Assert.Equal("waitHandle", exception.ParamName);
         }
 
-        [Fact]
-        public void WhenCallingStartShouldSubscribeToNetworkConnectEvent()
-        {
-            this.NetworkStateService.Start();
 
-            this.SystemNotifier.Verify(s => s.NotifyOnNetworkConnect("Reyna\\NetworkConnected"), Times.Once());
-        }
-
-        [Fact]
-        public void WhenCallingStopShouldClearSubscriptionToNetworkConnectEvent()
-        {
-            this.NetworkStateService.Stop();
-
-            this.SystemNotifier.Verify(s => s.ClearNotification("Reyna\\NetworkConnected"), Times.Once());
-        }
-
-        [Fact]
-        public void WhenCallingDisposeShouldClearSubscriptionToNetworkConnectEvent()
-        {
-            this.NetworkStateService.Dispose();
-
-            this.SystemNotifier.Verify(s => s.ClearNotification("Reyna\\NetworkConnected"), Times.Once());
-        }
 
         [Fact]
         public void WhenCallingStartAndNetworkConnectedShouldNotifySubscribers()
@@ -83,7 +53,7 @@
             System.Threading.Thread.Sleep(100);
 
             Assert.True(connectedEventFired);
-            this.SystemNotifier.Verify(s => s.NotifyOnNetworkConnect("Reyna\\NetworkConnected"), Times.Once());
+
         }
 
         [Fact]

@@ -61,13 +61,18 @@ namespace TestHarness
         {
             try
             {
-                this.reyna.Put(new Message(new Uri("http://testing"), "Reyna Test Message"));
+                this.reyna.Put(new Message(new Uri("http://localhost:62559/post.aspx"), getMessage()));
                 MessageBox.Show("Message Sent");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private string getMessage()
+        {
+         return  "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:tem='http://tempuri.org/'><soapenv:Header/><soapenv:Body><tem:HandleMessage><!--Optional:--><tem:message>7</tem:message></tem:HandleMessage></soapenv:Body></soapenv:Envelope>";
         }
     }
 }

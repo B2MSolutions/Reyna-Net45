@@ -3,35 +3,29 @@
     using System;
     using System.Threading;
     using Reyna.Interfaces;
+    using System.Net.NetworkInformation;
     
     internal sealed class NetworkStateService : ThreadWorker, INetworkStateService
     {
         public static readonly string NetworkConnectedNamedEvent = "Reyna_NetworkConnected";
 
-        public NetworkStateService(ISystemNotifier systemNotifier, IWaitHandle waitHandle) : base(waitHandle, false)
+        public NetworkStateService(IWaitHandle waitHandle) : base(waitHandle, false)
         {
-            if (systemNotifier == null)
-            {
-                throw new ArgumentNullException("systemNotifier");
-            }
-            
-            this.SystemNotifier = systemNotifier;
+
         }
         
         public event EventHandler<EventArgs> NetworkConnected;
 
-        private ISystemNotifier SystemNotifier { get; set; }
-
         public override void Start()
         {
             base.Start();
-            this.SubscribeToNetworkStateChange();
+            NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
         }
 
         public override void Stop()
         {
             base.Stop();
-            this.UnSubscribeToNetworkStateChange();
+            NetworkChange.NetworkAvailabilityChanged -= NetworkAvailabilityChanged;
         }
 
         internal void SendNetworkConnectedEvent()
@@ -61,14 +55,22 @@
             }
         }
 
-        private void SubscribeToNetworkStateChange()
+        private void NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
-            this.SystemNotifier.NotifyOnNetworkConnect(NetworkStateService.NetworkConnectedNamedEvent);
+            if (e.IsAvailable)
+            {
+                this.SendNetworkConnectedEvent();
+            }
         }
 
-        private void UnSubscribeToNetworkStateChange()
-        {
-            this.SystemNotifier.ClearNotification(NetworkStateService.NetworkConnectedNamedEvent);
-        }
+        //private void SubscribeToNetworkStateChange()
+        //{
+        //    this.SystemNotifier.NotifyOnNetworkConnect(NetworkStateService.NetworkConnectedNamedEvent);
+        //}
+
+        //private void UnSubscribeToNetworkStateChange()
+        //{
+        //    this.SystemNotifier.ClearNotification(NetworkStateService.NetworkConnectedNamedEvent);
+        //}
     }
 }

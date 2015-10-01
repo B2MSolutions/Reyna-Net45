@@ -108,7 +108,6 @@
     <Compile Include="Services\GivenAStoreService.cs" />
     <Compile Include="Store\GivenAMessage.cs" />
     <Compile Include="Store\GivenAnInMemoryQueue.cs" />
-    <Compile Include="System\GivenASystemNotifier.cs" />
     <Compile Include="TestUnityHelper.cs" />
     <Compile Include="Threading\GivenANamedWaitHandle.cs" />
   </ItemGroup>
