@@ -4,28 +4,31 @@
     using System.Threading;
     using Reyna.Interfaces;
     using System.Net.NetworkInformation;
-    
+
     internal sealed class NetworkStateService : ThreadWorker, INetworkStateService
     {
         public static readonly string NetworkConnectedNamedEvent = "Reyna_NetworkConnected";
-
-        public NetworkStateService(IWaitHandle waitHandle) : base(waitHandle, false)
-        {
-
-        }
         
         public event EventHandler<EventArgs> NetworkConnected;
 
+        internal INetwork Network { get; set; }
+
+        public NetworkStateService(INamedWaitHandle waitHandle, INetwork network) : base(waitHandle, false)
+        {
+            waitHandle.Initialize(false, Reyna.NetworkStateService.NetworkConnectedNamedEvent);
+            this.Network = network;
+        }
+        
         public override void Start()
         {
             base.Start();
-            NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
+            this.Network.StateChanged += NetworkAvailabilityChanged;
         }
 
         public override void Stop()
         {
             base.Stop();
-            NetworkChange.NetworkAvailabilityChanged -= NetworkAvailabilityChanged;
+            this.Network.StateChanged -= NetworkAvailabilityChanged;
         }
 
         internal void SendNetworkConnectedEvent()
@@ -62,15 +65,5 @@
                 this.SendNetworkConnectedEvent();
             }
         }
-
-        //private void SubscribeToNetworkStateChange()
-        //{
-        //    this.SystemNotifier.NotifyOnNetworkConnect(NetworkStateService.NetworkConnectedNamedEvent);
-        //}
-
-        //private void UnSubscribeToNetworkStateChange()
-        //{
-        //    this.SystemNotifier.ClearNotification(NetworkStateService.NetworkConnectedNamedEvent);
-        //}
     }
 }

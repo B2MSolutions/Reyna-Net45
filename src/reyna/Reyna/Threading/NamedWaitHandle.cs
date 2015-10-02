@@ -3,9 +3,13 @@
     using System.Threading;
     using Reyna.Interfaces;
 
-    public class NamedWaitHandle : IWaitHandle
+    public class NamedWaitHandle : INamedWaitHandle
     {
-        public NamedWaitHandle(bool initialState, string name)
+        public NamedWaitHandle()
+        {
+        }
+
+        public void Initialize(bool initialState, string name)
         {
             this.EventWaitHandle = new EventWaitHandle(initialState, EventResetMode.ManualReset, name);
         }

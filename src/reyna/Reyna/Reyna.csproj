@@ -88,6 +88,8 @@
     <Compile Include="Http\IHttpClient.cs" />
     <Compile Include="Http\Result.cs" />
     <Compile Include="NativeMethods\NativeMethods.cs" />
+    <Compile Include="Network\INetwork.cs" />
+    <Compile Include="Network\Network.cs" />
     <Compile Include="Power\PowerManager.cs" />
     <Compile Include="Power\SystemPowerStatus.cs" />
     <Compile Include="Preferences\IPreferences.cs" />
@@ -96,9 +98,11 @@
     <Compile Include="Preferences\Registry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ForwardService.cs" />
+    <Compile Include="Services\IForwardService.cs" />
     <Compile Include="Services\INetworkStateService.cs" />
     <Compile Include="Services\IReyna.cs" />
     <Compile Include="Services\IService.cs" />
+    <Compile Include="Services\IStoreService.cs" />
     <Compile Include="Services\NetworkStateService.cs" />
     <Compile Include="Services\ReynaService.cs" />
     <Compile Include="Services\ServiceBase.cs" />
@@ -111,6 +115,8 @@
     <Compile Include="Store\Message.cs" />
     <Compile Include="Store\SQLiteRepository.cs" />
     <Compile Include="Threading\AutoResetEventAdapter.cs" />
+    <Compile Include="Threading\IAutoResetEventAdapter.cs" />
+    <Compile Include="Threading\INamedWaitHandle.cs" />
     <Compile Include="Threading\IWaitHandle.cs" />
     <Compile Include="Threading\NamedWaitHandle.cs" />
     <Compile Include="Threading\Sleep.cs" />

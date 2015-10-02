@@ -28,12 +28,13 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IRepository) && r.Name == Constants.Injection.SQLITE_STORE && r.MappedToType == typeof(SQLiteRepository)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IRepository) && r.Name == Constants.Injection.VOLATILE_STORE && r.MappedToType == typeof(InMemoryQueue)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkStateService) && r.MappedToType == typeof(NetworkStateService)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IWaitHandle) && r.Name == Constants.Injection.NETWORK_WAIT_HANDLE && r.MappedToType == typeof(NamedWaitHandle)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IWaitHandle) && r.Name == Constants.Injection.FORWARD_WAIT_HANDLE && r.MappedToType == typeof(AutoResetEventAdapter)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IWaitHandle) && r.Name == Constants.Injection.STORE_WAIT_HANDLE && r.MappedToType == typeof(AutoResetEventAdapter)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IService) && r.Name == Constants.Injection.STORE_SERVICE && r.MappedToType == typeof(StoreService)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IService) && r.Name == Constants.Injection.FORWARD_SERVICE && r.MappedToType == typeof(ForwardService)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IAutoResetEventAdapter) && r.MappedToType == typeof(AutoResetEventAdapter)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INamedWaitHandle) && r.MappedToType == typeof(NamedWaitHandle)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IStoreService) && r.MappedToType == typeof(StoreService)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IForwardService) && r.MappedToType == typeof(ForwardService)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IEncryptionChecker) && r.MappedToType == typeof(EncryptionChecker)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetwork) && r.MappedToType == typeof(Network)));
+            Assert.Equal(12, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

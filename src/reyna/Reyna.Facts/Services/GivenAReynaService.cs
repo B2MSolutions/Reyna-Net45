@@ -20,12 +20,9 @@
         private Mock<IRepository> volatileStore;
         private Mock<IRepository> persistentStore;
         private Mock<IPreferences> preferences;
-        private Mock<IService> storeService; 
-        private Mock<IService> forwardService; 
-        private Mock<IWaitHandle> networkWaitHandle;
+        private Mock<IStoreService> storeService; 
+        private Mock<IForwardService> forwardService; 
         private Mock<INetworkStateService> networkStateService;
-        private Mock<IWaitHandle> forwardWaitHandle;
-        private Mock<IWaitHandle> storeWaitHandle;
         private Mock<IEncryptionChecker> encryptionChecker;
 
         public GivenAReynaService()
@@ -35,10 +32,7 @@
             this.preferences = this.unity.mockPreferences;
             this.persistentStore = this.unity.mockSqlStore;
             this.volatileStore = this.unity.mockVolatileStore;
-            this.networkWaitHandle = this.unity.mockNetworkWaitHandle;
             this.networkStateService = this.unity.mockNetworkStateService;
-            this.forwardWaitHandle = this.unity.mockForwardWaitHandle;
-            this.storeWaitHandle = this.unity.mockStoreWaitHandle;
             this.storeService = this.unity.mockStoreService;
             this.forwardService = this.unity.mockForwardService;
             this.encryptionChecker = this.unity.mockEncryptionChecker;
@@ -51,13 +45,27 @@
             Assert.Same(this.preferences.Object, this.service.Preferences);
             Assert.Same(this.volatileStore.Object, this.service.VolatileStore);
             Assert.Same(this.persistentStore.Object, this.service.PersistentStore);
-            Assert.Same(this.networkWaitHandle.Object, this.service.NetworkWaitHandle);
             Assert.Same(this.networkStateService.Object, this.service.NetworkStateService);
-            Assert.Same(this.forwardWaitHandle.Object, this.service.ForwardWaitHandle);
-            Assert.Same(this.storeWaitHandle.Object, this.service.StoreWaitHandle);
-            Assert.Same(this.storeService.Object, this.service.StoreService);
             Assert.Same(this.forwardService.Object, this.service.ForwardService);
             Assert.Same(this.encryptionChecker.Object, this.service.EncryptionChecker);
+        }
+
+        [Fact]
+        public void WhenConstructingShouldCallInitialiseOnStoreService()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            ReynaService service = new ReynaService(null, null, container);
+            helper.mockStoreService.Verify(s => s.Initialize(helper.mockVolatileStore.Object, helper.mockSqlStore.Object), Times.Exactly(1));
+        }
+
+        [Fact]
+        public void WhenConstructingShouldCallInitialiseOnForwardService()
+        {
+            var helper = new TestUnityHelper();
+            var container = helper.GetContainer();
+            ReynaService service = new ReynaService(null, null, container);
+            helper.mockForwardService.Verify(s => s.Initialize(helper.mockSqlStore.Object, helper.mockHttpClient.Object, helper.mockNetworkStateService.Object, It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
         }
 
         [Theory]

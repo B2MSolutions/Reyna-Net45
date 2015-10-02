@@ -10,7 +10,8 @@
     {
         public GivenANamedWaitHandle()
         {
-            this.NamedWaitHandle = new NamedWaitHandle(false, "NAME");
+            this.NamedWaitHandle = new NamedWaitHandle();
+            this.NamedWaitHandle.Initialize(false, "NAME");
         }
 
         private NamedWaitHandle NamedWaitHandle { get; set; }
@@ -19,13 +20,6 @@
         public void WhenCallingSetShouldNotThrow()
         {
             this.NamedWaitHandle.Set();
-        }
-
-        [Fact(Skip = "true")]
-        public void WhenCallingWaitOneShouldNotThrow()
-        {
-            this.NamedWaitHandle = new NamedWaitHandle(true, "NAME");
-            this.NamedWaitHandle.WaitOne();
         }
 
         [Fact]

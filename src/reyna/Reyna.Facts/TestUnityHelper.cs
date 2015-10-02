@@ -12,17 +12,14 @@
 
     public class TestUnityHelper
     {
-        public Mock<IHttpClient> mockHttpClient = new Mock<IHttpClient>();
-        public Mock<IPreferences> mockPreferences = new Mock<IPreferences>();
-        public Mock<IRepository> mockVolatileStore = new Mock<IRepository>();
-        public Mock<IRepository> mockSqlStore = new Mock<IRepository>();
-        public Mock<INetworkStateService> mockNetworkStateService = new Mock<INetworkStateService>();
-        public Mock<IWaitHandle> mockNetworkWaitHandle = new Mock<IWaitHandle>();
-        public Mock<IWaitHandle> mockForwardWaitHandle = new Mock<IWaitHandle>();
-        public Mock<IWaitHandle> mockStoreWaitHandle = new Mock<IWaitHandle>();
-        public Mock<IService> mockStoreService = new Mock<IService>();
-        public Mock<IService> mockForwardService = new Mock<IService>();
-        public Mock<IEncryptionChecker> mockEncryptionChecker = new Mock<IEncryptionChecker>();
+        internal Mock<IHttpClient> mockHttpClient = new Mock<IHttpClient>();
+        internal Mock<IPreferences> mockPreferences = new Mock<IPreferences>();
+        internal Mock<IRepository> mockVolatileStore = new Mock<IRepository>();
+        internal Mock<IRepository> mockSqlStore = new Mock<IRepository>();
+        internal Mock<INetworkStateService> mockNetworkStateService = new Mock<INetworkStateService>();
+        internal Mock<IStoreService> mockStoreService = new Mock<IStoreService>();
+        internal Mock<IForwardService> mockForwardService = new Mock<IForwardService>();
+        internal Mock<IEncryptionChecker> mockEncryptionChecker = new Mock<IEncryptionChecker>();
 
         public IUnityContainer GetContainer()
         {
@@ -31,13 +28,10 @@
             container.RegisterInstance<IHttpClient>(this.mockHttpClient.Object);
             container.RegisterInstance<IPreferences>(this.mockPreferences.Object);
             container.RegisterInstance<IRepository>(Constants.Injection.VOLATILE_STORE, this.mockVolatileStore.Object);
-            container.RegisterInstance <IRepository>(Constants.Injection.SQLITE_STORE, this.mockSqlStore.Object);
+            container.RegisterInstance<IRepository>(Constants.Injection.SQLITE_STORE, this.mockSqlStore.Object);
             container.RegisterInstance<INetworkStateService>(this.mockNetworkStateService.Object);
-            container.RegisterInstance<IWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE, this.mockNetworkWaitHandle.Object);
-            container.RegisterInstance<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE, this.mockForwardWaitHandle.Object);
-            container.RegisterInstance<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE, this.mockStoreWaitHandle.Object);
-            container.RegisterInstance<IService>(Constants.Injection.STORE_SERVICE, this.mockStoreService.Object);
-            container.RegisterInstance<IService>(Constants.Injection.FORWARD_SERVICE, this.mockForwardService.Object);
+            container.RegisterInstance<IStoreService>(this.mockStoreService.Object);
+            container.RegisterInstance<IForwardService>(this.mockForwardService.Object);
             container.RegisterInstance<IEncryptionChecker>(this.mockEncryptionChecker.Object);
 
             return container;

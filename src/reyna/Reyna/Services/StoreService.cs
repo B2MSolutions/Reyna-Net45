@@ -3,17 +3,10 @@
     using System;
     using Reyna.Interfaces;
 
-    internal sealed class StoreService : ServiceBase
+    internal sealed class StoreService : ServiceBase, IStoreService
     {
-        public StoreService(IRepository sourceStore, IRepository targetStore, IWaitHandle waitHandle) : base(sourceStore, waitHandle, false)
+        public StoreService( IAutoResetEventAdapter waitHandle) : base(waitHandle, false)
         {
-            if (targetStore == null)
-            {
-                throw new ArgumentNullException("targetStore");
-            }
-
-            this.TargetStore = targetStore;
-            this.TargetStore.Initialise();
         }
 
         private IRepository TargetStore { get; set; }
@@ -42,6 +35,18 @@
 
                 this.WaitHandle.Reset();
             }
+        }
+
+        public void Initialize(IRepository sourceStore, IRepository targetStore)
+        {
+            if (targetStore == null)
+            {
+                throw new ArgumentNullException("targetStore");
+            }
+
+            this.TargetStore = targetStore;
+            this.TargetStore.Initialise();
+            base.Initialize(sourceStore);
         }
     }
 }

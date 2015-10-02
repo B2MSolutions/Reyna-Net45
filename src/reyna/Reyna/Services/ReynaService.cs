@@ -1,10 +1,8 @@
 ﻿namespace Reyna
 {
-    using System;
-    using System.Net;
-    using Microsoft.Win32;
-    using Reyna.Interfaces;
     using Microsoft.Practices.Unity;
+    using Reyna.Interfaces;
+    using System.Net;
 
     public sealed class ReynaService : IReyna
     {
@@ -15,12 +13,9 @@
         internal IHttpClient HttpClient { get; set; }
         internal IPreferences Preferences { get; set; }
         internal IEncryptionChecker EncryptionChecker { get; set; }
-        internal IService StoreService { get; set; }
-        internal IService ForwardService { get; set; }
+        internal IStoreService StoreService { get; set; }
+        internal IForwardService ForwardService { get; set; }
         internal INetworkStateService NetworkStateService { get; set; }
-        internal IWaitHandle StoreWaitHandle { get; set; }
-        internal IWaitHandle ForwardWaitHandle { get; set; }
-        internal IWaitHandle NetworkWaitHandle { get; set; }
         internal byte[] Password { get; set; }
 
         public ReynaService() : this(null, null)
@@ -37,60 +32,21 @@
             this.Preferences = container.Resolve<IPreferences>();
             this.VolatileStore = container.Resolve<IRepository>(Constants.Injection.VOLATILE_STORE);
             this.PersistentStore = container.Resolve<IRepository>(Constants.Injection.SQLITE_STORE);
+            this.NetworkStateService = container.Resolve<INetworkStateService>();
+            this.StoreService = container.Resolve<IStoreService>();
+            this.ForwardService = container.Resolve<IForwardService>();
+            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();   
 
-            this.NetworkWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.NETWORK_WAIT_HANDLE,
-                new ResolverOverride[]
-                                   {
-                                       new ParameterOverride("initialState", false), 
-                                       new ParameterOverride("name", Reyna.NetworkStateService.NetworkConnectedNamedEvent)
-                                   });
-            
-            this.NetworkStateService = container.Resolve<INetworkStateService>(
-                new ResolverOverride[]
-                                   {
-                                       new ParameterOverride("waitHandle",this.NetworkWaitHandle)
-                                   });
-
-            this.StoreWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.STORE_WAIT_HANDLE,
-                new ResolverOverride[]
-                                    { 
-                                        new ParameterOverride("initialState", false)
-                                    });
-
-
-            this.ForwardWaitHandle = container.Resolve<IWaitHandle>(Constants.Injection.FORWARD_WAIT_HANDLE,
-                new ResolverOverride[]
-                                    { 
-                                        new ParameterOverride("initialState", false)
-                                    });
-
-            this.StoreService = container.Resolve<IService>(Constants.Injection.STORE_SERVICE,
-                new ResolverOverride[]
-                                    {
-                                        new ParameterOverride("sourceStore", this.VolatileStore),
-                                        new ParameterOverride("targetStore", this.PersistentStore),
-                                        new ParameterOverride("waitHandle", this.StoreWaitHandle)
-                                    });
-
-            this.ForwardService = container.Resolve<IService>(Constants.Injection.FORWARD_SERVICE,
-                new ResolverOverride[]
-                                    {
-                                        new ParameterOverride("sourceStore", this.PersistentStore),
-                                        new ParameterOverride("httpClient", this.HttpClient),
-                                        new ParameterOverride("networkState", this.NetworkStateService),
-                                        new ParameterOverride("waitHandle", this.ForwardWaitHandle),
-                                        new ParameterOverride("temporaryErrorMilliseconds", this.Preferences.ForwardServiceTemporaryErrorBackout),
-                                        new ParameterOverride("sleepMilliseconds", Preferences.ForwardServiceMessageBackout)
-                                    });
-            
+            this.StoreService.Initialize(this.VolatileStore, this.PersistentStore);
+            this.ForwardService.Initialize(this.PersistentStore, this.HttpClient, this.NetworkStateService, this.Preferences.ForwardServiceTemporaryErrorBackout, this.Preferences.ForwardServiceMessageBackout);
+                                            
             this.Password = password;
 
             if (password != null)
             {
                 this.PersistentStore.Password = password;
             }
-
-            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();            
+         
             if (certificatePolicy != null)
             {
                 this.HttpClient.SetCertificatePolicy(certificatePolicy);

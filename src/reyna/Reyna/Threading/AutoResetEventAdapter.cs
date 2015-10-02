@@ -3,9 +3,14 @@
     using System.Threading;
     using Reyna.Interfaces;
 
-    internal sealed class AutoResetEventAdapter : IWaitHandle
+    internal sealed class AutoResetEventAdapter : IAutoResetEventAdapter
     {
-        public AutoResetEventAdapter(bool initialState)
+        public AutoResetEventAdapter()
+        {
+            this.Initialize(false);
+        }
+
+        public void Initialize(bool initialState)
         {
             this.AutoResetEvent = new AutoResetEvent(initialState);
         }

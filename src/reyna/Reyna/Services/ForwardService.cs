@@ -4,28 +4,11 @@
     using System.Threading;
     using Reyna.Interfaces;
 
-    internal sealed class ForwardService : ServiceBase
+    internal sealed class ForwardService : ServiceBase, IForwardService
     {
-        public ForwardService(IRepository sourceStore, IHttpClient httpClient, INetworkStateService networkState, IWaitHandle waitHandle, int temporaryErrorMilliseconds, int sleepMilliseconds)
-            : base(sourceStore, waitHandle, true)
+        public ForwardService(IAutoResetEventAdapter waitHandle)
+            : base(waitHandle, true)
         {
-            if (httpClient == null)
-            {
-                throw new ArgumentNullException("httpClient");
-            }
-
-            if (networkState == null)
-            {
-                throw new ArgumentNullException("networkState");
-            }
-
-            this.HttpClient = httpClient;
-            this.NetworkState = networkState;
-
-            this.TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
-            this.SleepMilliseconds = sleepMilliseconds;
-
-            this.NetworkState.NetworkConnected += this.OnNetworkConnected;
         }
 
         internal int TemporaryErrorMilliseconds { get; set; }
@@ -91,6 +74,30 @@
             {
                 Reyna.Sleep.Wait(millisecondsTimeout / 1000);
             }
+        }
+
+        public void Initialize(IRepository sourceStore, IHttpClient httpClient, INetworkStateService networkState, 
+            int temporaryErrorMilliseconds, int sleepMilliseconds)
+        {
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException("httpClient");
+            }
+
+            if (networkState == null)
+            {
+                throw new ArgumentNullException("networkState");
+            }
+
+            this.HttpClient = httpClient;
+            this.NetworkState = networkState;
+
+            this.TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
+            this.SleepMilliseconds = sleepMilliseconds;
+
+            this.NetworkState.NetworkConnected += this.OnNetworkConnected;
+
+            base.Initialize(sourceStore);
         }
     }
 }
