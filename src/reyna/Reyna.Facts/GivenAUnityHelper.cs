@@ -34,7 +34,8 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IForwardService) && r.MappedToType == typeof(ForwardService)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IEncryptionChecker) && r.MappedToType == typeof(EncryptionChecker)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetwork) && r.MappedToType == typeof(Network)));
-            Assert.Equal(12, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionManager) && r.MappedToType == typeof(ConnectionManager)));
+            Assert.Equal(13, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

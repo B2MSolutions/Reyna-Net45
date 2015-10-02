@@ -10,8 +10,11 @@
 
     public sealed class HttpClient : IHttpClient
     {
-        public HttpClient()
+        public IConnectionManager ConnectionManager { get; set; }
+
+        public HttpClient(IConnectionManager connectionManager)
         {
+            this.ConnectionManager = connectionManager;
         }
 
         public void SetCertificatePolicy(ICertificatePolicy certificatePolicy)
@@ -24,9 +27,9 @@
             }
         }
 
-        public static Result CanSend()
+        public Result CanSend()
         {
-            return new ConnectionManager().CanSend;
+            return this.ConnectionManager.CanSend;
         }
 
         public Result Post(IMessage message)
@@ -63,7 +66,7 @@
             }
         }
 
-        internal static HttpStatusCode GetStatusCode(HttpWebResponse response)
+        internal HttpStatusCode GetStatusCode(HttpWebResponse response)
         {
             if (response == null)
             {
@@ -89,13 +92,13 @@
 
                 using (var response = request.GetResponse() as HttpWebResponse)
                 {
-                    statusCode = HttpClient.GetStatusCode(response);
+                    statusCode = this.GetStatusCode(response);
                 }
             }
             catch (WebException webException)
             {
                 var response = webException.Response as HttpWebResponse;
-                statusCode = HttpClient.GetStatusCode(response);
+                statusCode = this.GetStatusCode(response);
             }
 
             return HttpStatusCodeExtensions.ToResult(statusCode);

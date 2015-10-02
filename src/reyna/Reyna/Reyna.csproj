@@ -81,7 +81,6 @@
     <Compile Include="Connection\ConnectionManager.cs" />
     <Compile Include="Connection\IConnectionInfo.cs" />
     <Compile Include="Connection\IConnectionManager.cs" />
-    <Compile Include="Connection\OpenNETCF.Net.cs" />
     <Compile Include="Extensions\HttpStatusCodeExtensions.cs" />
     <Compile Include="Http\AcceptAllCertificatePolicy.cs" />
     <Compile Include="Http\HttpClient.cs" />

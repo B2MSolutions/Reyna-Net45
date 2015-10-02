@@ -1,7 +1,6 @@
 ﻿namespace Reyna.Facts
 {
     using Moq;
-    using OpenNETCF.Net.NetworkInformation;
     using Xunit;
     using Xunit.Extensions;
 

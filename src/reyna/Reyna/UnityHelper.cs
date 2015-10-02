@@ -25,6 +25,7 @@
             container.RegisterType<IForwardService, ForwardService>();
             container.RegisterType<IEncryptionChecker, EncryptionChecker>();
             container.RegisterType<INetwork, Network>();
+            container.RegisterType<IConnectionManager, ConnectionManager>();
 
             return container;
         }
