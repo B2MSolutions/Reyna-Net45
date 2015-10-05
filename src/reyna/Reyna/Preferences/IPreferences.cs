@@ -26,5 +26,6 @@ namespace Reyna
         void SetStorageSizeLimit(long limit);
         int ForwardServiceTemporaryErrorBackout {get; }
         int ForwardServiceMessageBackout { get; }
+        void SaveCellularDataAsWwanForBackwardsCompatibility();
     }
 }

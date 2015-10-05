@@ -8,11 +8,20 @@
 
     public class ConnectionManager : IConnectionManager
     {
-        public ConnectionManager()
+        internal IPreferences Preferences { get; set; }
+
+        internal IPowerManager PowerManager { get; set; }
+
+        internal IConnectionInfo ConnectionInfo { get; set; }
+
+        internal IBlackoutTime BlackoutTime  { get; set; }
+
+        public ConnectionManager(IPreferences preferences, IPowerManager powerManager, IConnectionInfo connectionInfo, IBlackoutTime blackoutTime)
         {
-            this.Preferences = new Preferences();
-            this.PowerManager = new PowerManager();
-            this.ConnectionInfo = new ConnectionInfo();
+            this.Preferences = preferences;
+            this.PowerManager = powerManager;
+            this.ConnectionInfo = connectionInfo;
+            this.BlackoutTime = blackoutTime;
         }
 
         public Result CanSend
@@ -42,16 +51,14 @@
                 if (this.Preferences.RoamingBlackout && this.ConnectionInfo.Roaming)
                 {
                     return Result.Blackout;
-                }
+                } 
 
-                BlackoutTime blackoutTime = new BlackoutTime();
-
-                if (!ConnectionManager.CanSendNow(blackoutTime, this.Preferences.WlanBlackoutRange) && this.ConnectionInfo.Wifi)
+                if (!this.CanSendNow(this.BlackoutTime, this.Preferences.WlanBlackoutRange) && this.ConnectionInfo.Wifi)
                 {
                     return Result.Blackout;
                 }
 
-                if (!ConnectionManager.CanSendNow(blackoutTime, this.Preferences.WwanBlackoutRange) && this.ConnectionInfo.Mobile)
+                if (!this.CanSendNow(this.BlackoutTime, this.Preferences.WwanBlackoutRange) && this.ConnectionInfo.Mobile)
                 {
                     return Result.Blackout;
                 }
@@ -60,13 +67,7 @@
             }
         }
 
-        internal Preferences Preferences { get; set; }
-
-        internal PowerManager PowerManager { get; set; }
-
-        internal IConnectionInfo ConnectionInfo { get; set; }
-
-        internal static bool CanSendNow(BlackoutTime blackoutTime, string range)
+        private bool CanSendNow(IBlackoutTime blackoutTime, string range)
         {
             return blackoutTime.CanSendAtTime(System.DateTime.Now, range);
         }

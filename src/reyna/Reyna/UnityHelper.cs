@@ -2,6 +2,7 @@
 {
     using Microsoft.Practices.Unity;
     using Reyna.Interfaces;
+    using Reyna.Power;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -26,6 +27,9 @@
             container.RegisterType<IEncryptionChecker, EncryptionChecker>();
             container.RegisterType<INetwork, Network>();
             container.RegisterType<IConnectionManager, ConnectionManager>();
+            container.RegisterType<IPowerManager, PowerManager>();
+            container.RegisterType<IConnectionInfo, ConnectionInfo>();
+            container.RegisterType<IBlackoutTime, BlackoutTime>();
 
             return container;
         }

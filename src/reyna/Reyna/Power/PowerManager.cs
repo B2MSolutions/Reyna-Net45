@@ -1,6 +1,8 @@
 ﻿namespace Reyna.Power
 {
-    public class PowerManager
+    using Reyna.Interfaces;
+
+    public class PowerManager : IPowerManager
     {
         public const byte Online = 0x01;
 
@@ -18,7 +20,7 @@
             }
         }
 
-        internal bool IsBatteryCharging()
+        public bool IsBatteryCharging()
         {
             var systemPowerStatus = this.SystemPowerStatus;
             if (systemPowerStatus != null)

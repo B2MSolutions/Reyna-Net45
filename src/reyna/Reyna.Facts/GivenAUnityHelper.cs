@@ -3,6 +3,7 @@ namespace Reyna.Facts
 {
     using Microsoft.Practices.Unity;
     using Reyna.Interfaces;
+    using Reyna.Power;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -35,7 +36,11 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IEncryptionChecker) && r.MappedToType == typeof(EncryptionChecker)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetwork) && r.MappedToType == typeof(Network)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionManager) && r.MappedToType == typeof(ConnectionManager)));
-            Assert.Equal(13, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPowerManager) && r.MappedToType == typeof(PowerManager)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionInfo) && r.MappedToType == typeof(ConnectionInfo)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IBlackoutTime) && r.MappedToType == typeof(BlackoutTime)));
+
+            Assert.Equal(16, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

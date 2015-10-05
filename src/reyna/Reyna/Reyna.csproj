@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blackout\BlackoutTime.cs" />
+    <Compile Include="Blackout\IBlackoutTime.cs" />
     <Compile Include="Blackout\Time.cs" />
     <Compile Include="Blackout\TimeRange.cs" />
     <Compile Include="Connection\ConnectionInfo.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="NativeMethods\NativeMethods.cs" />
     <Compile Include="Network\INetwork.cs" />
     <Compile Include="Network\Network.cs" />
+    <Compile Include="Power\IPowerManager.cs" />
     <Compile Include="Power\PowerManager.cs" />
     <Compile Include="Power\SystemPowerStatus.cs" />
     <Compile Include="Preferences\IPreferences.cs" />

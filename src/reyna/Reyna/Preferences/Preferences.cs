@@ -203,7 +203,7 @@
             return true;
         }
 
-        internal static void SaveCellularDataAsWwanForBackwardsCompatibility()
+        public void SaveCellularDataAsWwanForBackwardsCompatibility()
         {
             Preferences preferences = new Preferences();
             TimeRange timeRange = preferences.CellularDataBlackout;

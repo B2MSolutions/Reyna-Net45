@@ -3,8 +3,9 @@ namespace Reyna
 {
     using System;
     using System.Globalization;
+    using Reyna.Interfaces;
 
-    public class BlackoutTime
+    public class BlackoutTime : IBlackoutTime
     {
         public bool CanSendAtTime(DateTime now, string ranges)
         {
