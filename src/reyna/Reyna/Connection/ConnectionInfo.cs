@@ -38,33 +38,32 @@
         {
             get
             {
-                //try
-                //{
-                //    var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-                //    bool mobileNetworkConnected = false;
-                //    bool otherNetworksConnected = false;
-                //    foreach (var ni in interfaces)
-                //    {
-                //        if (GPRSNetwork(ni))
-                //        {
-                //            if (NetworkConnected(ni))
-                //            {
-                //                mobileNetworkConnected = true;
-                //            }
-                //        }
-                //        else if (NetworkConnected(ni))
-                //        {
-                //            otherNetworksConnected = true;
-                //        }
-                //    }
+                try
+                {
+                    var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                    bool mobileNetworkConnected = false;
+                    bool otherNetworksConnected = false;
+                    foreach (var ni in interfaces)
+                    {
+                        if (GPRSNetwork(ni))
+                        {
+                            if (ni.OperationalStatus == OperationalStatus.Up)
+                            {
+                                mobileNetworkConnected = true;
+                            }
+                        }
+                        else if (ni.NetworkInterfaceType != NetworkInterfaceType.Loopback && ni.OperationalStatus == OperationalStatus.Up)
+                        {
+                            otherNetworksConnected = true;
+                        }
+                    }
 
-                //    return mobileNetworkConnected && !otherNetworksConnected;
-                //}
-                //catch (Exception)
-                //{
-                //}
-
-                return false;
+                    return mobileNetworkConnected && !otherNetworksConnected;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }               
             }
         }
 
@@ -72,20 +71,26 @@
         {
             get
             {
-                //var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-                //var wireless = ConnectionInfo.FindWireless(networkInterfaces);
-                //if (wireless != null)
-                //{
-                //    return true;
-                //}
+                try
+                {
+                    var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                    foreach (var ni in interfaces)
+                    {
+                        if (WifiNetwork(ni))
+                        {
+                            if (ni.OperationalStatus == OperationalStatus.Up)
+                            {
+                                return true;
+                            }
+                        }
+                    }
 
-                //var networkInterface = FindWirelessByExclusion(networkInterfaces);
-                //if (networkInterface != null)
-                //{
-                //    return true;
-                //}
-
-                return false;
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
 
@@ -101,53 +106,15 @@
 
         internal IRegistry Registry { get; set; }
 
-        //private static WirelessNetworkInterface FindWireless(INetworkInterface[] interfaces)
-        //{
-        //    foreach (var ni in interfaces)
-        //    {
-        //        var wni = ni as WirelessNetworkInterface;
-        //        if (wni != null)
-        //        {
-        //            return wni;
-        //        }
-        //    }
+ 
+        private bool GPRSNetwork(NetworkInterface ni)
+        {
+            return ni.NetworkInterfaceType == NetworkInterfaceType.Wwanpp;
+        }
 
-        //    return null;
-        //}
-
-        //private static INetworkInterface FindWirelessByExclusion(INetworkInterface[] interfaces)
-        //{
-        //    foreach (var ni in interfaces)
-        //    {
-        //        if (LANNetwork(ni) || ActiveSyncNetwork(ni) || GPRSNetwork(ni))
-        //        {
-        //            continue;
-        //        }
-
-        //        return ni;
-        //    }
-
-        //    return null;
-        //}
-
-        //private static bool GPRSNetwork(INetworkInterface ni)
-        //{
-        //    return ni.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).StartsWith("cellular line", StringComparison.CurrentCulture);
-        //}
-
-        //private static bool ActiveSyncNetwork(INetworkInterface ni)
-        //{
-        //    return ni.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).StartsWith("usb", StringComparison.CurrentCulture);
-        //}
-
-        //private static bool LANNetwork(INetworkInterface ni)
-        //{
-        //    return ni.Speed == 10000000 || ni.Speed == 100000000;
-        //}
-
-        //private static bool NetworkConnected(INetworkInterface networkInterface)
-        //{
-        //    return string.Compare(networkInterface.CurrentIpAddress.ToString().Trim(), "0.0.0.0", StringComparison.OrdinalIgnoreCase) != 0;
-        //}
+        private bool WifiNetwork(NetworkInterface ni)
+        {
+            return ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
+        }
     }
 }
