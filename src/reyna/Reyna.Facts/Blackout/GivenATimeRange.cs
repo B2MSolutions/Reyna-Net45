@@ -38,6 +38,10 @@
             TimeRange range = new TimeRange(new Time(11, 00), new Time(12, 01));
             Assert.False(range.Contains(time));
 
+            time = new Time(10, 02);
+            range = new TimeRange(new Time(11, 00), new Time(12, 01));
+            Assert.False(range.Contains(time));
+
             time = new Time(19, 58);
             range = new TimeRange(new Time(19, 59), new Time(19, 57));
             Assert.False(range.Contains(time));

@@ -6,155 +6,132 @@
     using Moq;
     using Reyna.Interfaces;
     using Xunit;
+    using System.Collections.Generic;
 
     public class GivenAStoreService
     {
-    //    public GivenAStoreService()
-    //    {
-    //        this.VolatileStore = new InMemoryQueue();
-    //        this.PersistentStore = new Mock<IRepository>();
-    //        this.WaitHandle = new AutoResetEventAdapter(false);
+        private StoreService service;
+        private Mock<IAutoResetEventAdapter> autoResetEventAdapter;
+        private Mock<IRepository> volatileStore;
+        private Mock<IRepository> persistentStore;
+        private Mock<IPreferences> preferences;
 
-    //        this.PersistentStore.Setup(r => r.Add(It.IsAny<IMessage>()));
+        public GivenAStoreService()
+        {
+            this.autoResetEventAdapter = new Mock<IAutoResetEventAdapter>();
+            this.volatileStore = new Mock<IRepository>();
+            this.persistentStore = new Mock<IRepository>();
+            this.preferences = new Mock<IPreferences>();
 
-    //        this.StoreService = new StoreService(this.VolatileStore, this.PersistentStore.Object, this.WaitHandle);
-    //    }
+            this.service = new StoreService(this.autoResetEventAdapter.Object, this.preferences.Object);
+        }
 
-    //    private IRepository VolatileStore { get; set; }
+        [Fact]
+        public void whenCallingInitialiseShouldSetUpServiceCorrectly()
+        {
+            this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
+            Assert.Equal(this.volatileStore.Object, this.service.SourceStore);
+            Assert.Equal(this.persistentStore.Object, this.service.TargetStore);
+        }
 
-    //    private Mock<IRepository> PersistentStore { get; set; }
+        [Fact]
+        public void whenCallingInitialiseShouldInitialiseStores()
+        {
+            this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
+            this.persistentStore.Verify(p => p.Initialise(), Times.Exactly(1));
+            this.volatileStore.Verify(v => v.Initialise(), Times.Exactly(1));
+        }
 
-    //    private IWaitHandle WaitHandle { get; set; }
+        [Fact]
+        public void whenCallingInitialiseWithNullSourceStoreShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(null, this.persistentStore.Object));
+        }
 
-    //    private StoreService StoreService { get; set; }
+        [Fact]
+        public void whenCallingInitialiseWithNullTargetStoreShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(this.volatileStore.Object, null));
+        }
 
-    //    [Fact]
-    //    public void WhenCallingStartAndMessageAddedShouldCallPutOnRepository()
-    //    {
-    //        this.StoreService.Start();
+        [Fact]
+        public void whenConstructingAndWaitHandleIsNullShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => new StoreService(null, this.preferences.Object));
+        }
 
-    //        this.VolatileStore.Add(new Message(new Uri("http://www.google.com"), string.Empty));
-    //        Thread.Sleep(200);
-
-    //        Assert.Null(this.VolatileStore.Get());
-    //        this.PersistentStore.Verify(r => r.Add(It.IsAny<IMessage>()), Times.Once());
-    //    }
-
-    //    [Fact]
-    //    public void WhenCallingStartAndMessageAddedAndStorageSizeLimitExistsShouldCallAddWithLimitOnRepository()
-    //    {
-    //        using (var key = Registry.LocalMachine.CreateSubKey(@"Software\Reyna"))
-    //        {
-    //            ReynaService.SetStorageSizeLimit(null, 2000000);
-    //            this.StoreService.Start();
-
-    //            this.VolatileStore.Add(new Message(new Uri("http://www.google.com"), string.Empty));
-    //            Thread.Sleep(200);
-
-    //            Assert.Null(this.VolatileStore.Get());
-    //            this.PersistentStore.Verify(r => r.Add(It.IsAny<IMessage>(), 2000000), Times.Once());
-    //        }
-
-    //        Registry.LocalMachine.DeleteSubKey(@"Software\Reyna");
-    //    }
-
-    //    [Fact]
-    //    public void WhenCallingStartAndMessageAddedThenImmediatelyStopShouldNotCallPutOnRepository()
-    //    {
-    //        this.StoreService.Start();
-    //        Thread.Sleep(50);
-
-    //        this.VolatileStore.Add(new Message(new Uri("http://www.google.com"), string.Empty));
-    //        this.StoreService.Stop();
-    //        Thread.Sleep(200);
-
-    //        this.VolatileStore.Add(new Message(new Uri("http://www.google.com"), string.Empty));
-    //        Thread.Sleep(200);
-
-    //        Assert.NotNull(this.VolatileStore.Get());
-    //        this.PersistentStore.Verify(r => r.Add(It.IsAny<IMessage>()), Times.Once());
-    //    }
-
-    //    [Fact(Skip = "true")]
-    //    public void WhenCallingStartAndStopRapidlyWhilstAddingMessagesShouldNotCallPutOnRepository()
-    //    {
-    //        var messageAddingThread = new Thread(new ThreadStart(() =>
-    //            {
-    //                for (int j = 0; j < 10; j++)
-    //                {
-    //                    this.VolatileStore.Add(new Message(new Uri("http://www.google.com"), string.Empty));
-    //                    Thread.Sleep(100);
-    //                }
-    //            }));
-
-    //        messageAddingThread.Start();
-    //        Thread.Sleep(100);
-
-    //        for (int k = 0; k < 10; k++)
-    //        {
-    //            this.StoreService.Start();
-    //            Thread.Sleep(50);
-
-    //            this.StoreService.Stop();
-    //            Thread.Sleep(200);
-    //        }
-
-    //        Thread.Sleep(1000);
-
-    //        Assert.Null(this.VolatileStore.Get());
-    //        this.PersistentStore.Verify(r => r.Add(It.IsAny<IMessage>()), Times.Exactly(10));
-    //    }
-
-    //    [Fact]
-    //    public void WhenCallingStopOnStoreThatHasntStartedShouldNotThrow()
-    //    {
-    //        this.StoreService.Stop();
-    //    }
-
-    //    [Fact]
-    //    public void WhenCallingDisposeShouldNotThrow()
-    //    {
-    //        this.StoreService.Dispose();
-    //    }
-
-    //    [Fact]
-    //    public void WhenCallingStartStopDisposeShouldNotThrow()
-    //    {
-    //        this.StoreService.Start();
-    //        Thread.Sleep(50);
-
-    //        this.StoreService.Stop();
-    //        Thread.Sleep(50);
+        [Fact]
+        public void whenCallingStartShouldCallWaitHandle()
+        {
+            this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
             
-    //        this.StoreService.Dispose();
-    //    }
+            this.service.Start();
+            Thread.Sleep(50);
+            this.service.Stop();
 
-    //    [Fact]
-    //    public void WhenConstructingWithBothNullParametersShouldThrow()
-    //    {
-    //        var exception = Assert.Throws<ArgumentNullException>(() => new StoreService(null, null, this.WaitHandle));
-    //        Assert.Equal("sourceStore", exception.ParamName);
-    //    }
+            this.autoResetEventAdapter.Verify(a => a.WaitOne(), Times.AtLeastOnce());
+            this.autoResetEventAdapter.Verify(a => a.Reset(), Times.AtLeastOnce());
+        }
 
-    //    [Fact]
-    //    public void WhenConstructingWithNullMessageStoreParameterShouldThrow()
-    //    {
-    //        var exception = Assert.Throws<ArgumentNullException>(() => new StoreService(null, new Mock<IRepository>().Object, this.WaitHandle));
-    //        Assert.Equal("sourceStore", exception.ParamName);
-    //    }
+        [Fact]
+        public void whenCallingStartAndThereIsAMessageInTheSourceStoreShouldAddItToTheTargetStoreAndRemoveItFromTheSource()
+        {
+            this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
+            Message message = new Message(new Uri("http://google.com"), "MessageBody");
+            List<IMessage> messages = new List<IMessage> { message };
+            
+            this.volatileStore.Setup(v => v.Get()).Returns(() => this.GetMessage(messages));
+            this.volatileStore.Setup(v => v.Remove()).Callback(() => this.RemoveMessage(messages, message));
+            this.preferences.SetupGet(p => p.StorageSizeLimit).Returns(-1);
 
-    //    [Fact]
-    //    public void WhenConstructingWithNullRepositoryParameterShouldThrow()
-    //    {
-    //        var exception = Assert.Throws<ArgumentNullException>(() => new StoreService(new InMemoryQueue(), null, this.WaitHandle));
-    //        Assert.Equal("targetStore", exception.ParamName);
-    //    }
+            this.autoResetEventAdapter.Setup(a => a.Reset()).Callback(() => {
+                this.service.Stop();
+                this.persistentStore.Verify(p => p.Add(message), Times.Exactly(1));
+                Assert.Equal(0, messages.Count);
+            });
 
-    //    [Fact]
-    //    public void WhenConstructingWithNullWaitHandleStateParameterShouldThrow()
-    //    {
-    //        var exception = Assert.Throws<ArgumentNullException>(() => new StoreService(new Mock<IRepository>().Object, new Mock<IRepository>().Object, null));
-    //        Assert.Equal("waitHandle", exception.ParamName);
-    //    }
+            this.service.Start();
+        }
+
+        [Fact]
+        public void whenCallingStartAndThereIsAMessageInTheQueueAndAStorageSizeLimitIsSetShouldCallAddIwthStorageSizeLimit()
+        {
+            long limit = 123456;
+
+            this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
+            Message message = new Message(new Uri("http://google.com"), "MessageBody");
+            List<IMessage> messages = new List<IMessage> { message };
+
+            this.volatileStore.Setup(v => v.Get()).Returns(() => this.GetMessage(messages));
+            this.volatileStore.Setup(v => v.Remove()).Callback(() => this.RemoveMessage(messages, message));
+            this.preferences.SetupGet(p => p.StorageSizeLimit).Returns(limit);
+
+            this.autoResetEventAdapter.Setup(a => a.Reset()).Callback(() =>
+            {
+                this.service.Stop();
+                this.persistentStore.Verify(p => p.Add(message, limit), Times.Exactly(1));
+                this.persistentStore.Verify(p => p.Add(message), Times.Never);
+                Assert.Equal(0, messages.Count);
+            });
+
+            this.service.Start();
+        }
+        
+        private void RemoveMessage(List<IMessage> messages, IMessage message)
+        {
+            messages.Remove(message);
+        }
+
+        private IMessage GetMessage(List<IMessage> messages)
+        {
+            if (messages.Count > 0)
+            {
+                return messages[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

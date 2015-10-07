@@ -5,11 +5,13 @@
 
     internal sealed class StoreService : ServiceBase, IStoreService
     {
-        public StoreService( IAutoResetEventAdapter waitHandle) : base(waitHandle, false)
-        {
-        }
+        internal IRepository TargetStore { get; set; }
+        internal IPreferences preferences;
 
-        private IRepository TargetStore { get; set; }
+        public StoreService( IAutoResetEventAdapter waitHandle, IPreferences preferences) : base(waitHandle, false)
+        {
+            this.preferences = preferences;
+        }
 
         protected override void ThreadStart()
         {
@@ -20,7 +22,7 @@
 
                 while ((message = this.SourceStore.Get()) != null)
                 {
-                    long storageSizeLimit = new Preferences().StorageSizeLimit;
+                    long storageSizeLimit = this.preferences.StorageSizeLimit;
                     if (storageSizeLimit == -1)
                     {
                         this.TargetStore.Add(message);

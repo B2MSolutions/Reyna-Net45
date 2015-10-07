@@ -66,5 +66,12 @@
         {
             Assert.Throws<ArgumentException>(() => new Time(24 * 60));
         }
+
+        [Fact]
+        public void whenCallingMinuteOfDayShouldReturnCorrectMinute()
+        {
+            Time time = new Time();
+            Assert.Equal((DateTime.Now.Hour * 60) + DateTime.Now.Minute, time.MinuteOfDay);
+        }
     }
 }

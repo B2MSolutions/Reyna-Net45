@@ -6,6 +6,8 @@
 
     internal abstract class ServiceBase : ThreadWorker
     {
+        internal IRepository SourceStore { get; set; }
+
         public ServiceBase(IWaitHandle waitHandle, bool runOnStart)
             : base(waitHandle, runOnStart)
         {
@@ -24,8 +26,6 @@
 
             this.SourceStore.MessageAdded += this.OnMessageAdded;
         }
-
-        protected IRepository SourceStore { get; set; }
 
         public override void Dispose()
         {
