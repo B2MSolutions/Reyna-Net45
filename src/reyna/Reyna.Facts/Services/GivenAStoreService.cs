@@ -74,7 +74,7 @@
         }
 
         [Fact]
-        public void whenCallingStartAndThereIsAMessageInTheSourceStoreShouldAddItToTheTargetStoreAndRemoveItFromTheSource()
+        public void whenCallingDoWorkAndThereIsAMessageInTheSourceStoreShouldAddItToTheTargetStoreAndRemoveItFromTheSource()
         {
             this.service.Initialize(this.volatileStore.Object, this.persistentStore.Object);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
@@ -84,13 +84,10 @@
             this.volatileStore.Setup(v => v.Remove()).Callback(() => this.RemoveMessage(messages, message));
             this.preferences.SetupGet(p => p.StorageSizeLimit).Returns(-1);
 
-            this.autoResetEventAdapter.Setup(a => a.Reset()).Callback(() => {
-                this.service.Stop();
-                this.persistentStore.Verify(p => p.Add(message), Times.Exactly(1));
-                Assert.Equal(0, messages.Count);
-            });
+            this.service.DoWork();
 
-            this.service.Start();
+            this.persistentStore.Verify(p => p.Add(message), Times.Exactly(1));
+            Assert.Equal(0, messages.Count);
         }
 
         [Fact]
@@ -106,15 +103,11 @@
             this.volatileStore.Setup(v => v.Remove()).Callback(() => this.RemoveMessage(messages, message));
             this.preferences.SetupGet(p => p.StorageSizeLimit).Returns(limit);
 
-            this.autoResetEventAdapter.Setup(a => a.Reset()).Callback(() =>
-            {
-                this.service.Stop();
-                this.persistentStore.Verify(p => p.Add(message, limit), Times.Exactly(1));
-                this.persistentStore.Verify(p => p.Add(message), Times.Never);
-                Assert.Equal(0, messages.Count);
-            });
+            this.service.DoWork();
 
-            this.service.Start();
+            this.persistentStore.Verify(p => p.Add(message, limit), Times.Exactly(1));
+            this.persistentStore.Verify(p => p.Add(message), Times.Never);
+            Assert.Equal(0, messages.Count);
         }
         
         private void RemoveMessage(List<IMessage> messages, IMessage message)

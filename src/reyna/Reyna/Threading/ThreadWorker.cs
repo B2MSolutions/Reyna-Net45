@@ -7,6 +7,9 @@
     internal abstract class ThreadWorker : IService
     {
         private volatile bool terminate;
+        internal Thread WorkingThread { get; set; }
+        private bool RunOnStart { get; set; }
+        protected IWaitHandle WaitHandle { get; set; }
 
         public ThreadWorker(IWaitHandle waitHandle, bool runOnStart)
         {
@@ -19,9 +22,7 @@
             this.RunOnStart = runOnStart;
         }
 
-        protected IWaitHandle WaitHandle { get; set; }
-
-        protected bool Terminate
+        internal bool Terminate
         {
             get
             {
@@ -33,10 +34,6 @@
                 this.terminate = value;
             }
         }
-
-        private Thread WorkingThread { get; set; }
-
-        private bool RunOnStart { get; set; }
 
         public virtual void Start()
         {

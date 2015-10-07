@@ -17,26 +17,31 @@
         {
             while (!this.Terminate)
             {
-                this.WaitHandle.WaitOne();
-                IMessage message = null;
+                this.DoWork();
+            }
+        }
 
-                while ((message = this.SourceStore.Get()) != null)
+        internal void DoWork()
+        {
+            this.WaitHandle.WaitOne();
+            IMessage message = null;
+
+            while ((message = this.SourceStore.Get()) != null)
+            {
+                long storageSizeLimit = this.preferences.StorageSizeLimit;
+                if (storageSizeLimit == -1)
                 {
-                    long storageSizeLimit = this.preferences.StorageSizeLimit;
-                    if (storageSizeLimit == -1)
-                    {
-                        this.TargetStore.Add(message);
-                    }
-                    else
-                    {
-                        this.TargetStore.Add(message, storageSizeLimit);
-                    }
-                    
-                    this.SourceStore.Remove();
+                    this.TargetStore.Add(message);
+                }
+                else
+                {
+                    this.TargetStore.Add(message, storageSizeLimit);
                 }
 
-                this.WaitHandle.Reset();
+                this.SourceStore.Remove();
             }
+
+            this.WaitHandle.Reset();
         }
 
         public void Initialize(IRepository sourceStore, IRepository targetStore)

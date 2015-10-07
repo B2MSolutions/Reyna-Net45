@@ -120,7 +120,6 @@
     <Compile Include="Threading\INamedWaitHandle.cs" />
     <Compile Include="Threading\IWaitHandle.cs" />
     <Compile Include="Threading\NamedWaitHandle.cs" />
-    <Compile Include="Threading\Sleep.cs" />
     <Compile Include="Threading\ThreadWorker.cs" />
     <Compile Include="UnityHelper.cs" />
     <Compile Include="Utilities\Constants.cs" />
