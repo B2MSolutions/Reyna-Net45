@@ -10,6 +10,7 @@ namespace Reyna.Facts
     using System.Text;
     using System.Threading.Tasks;
     using Xunit;
+    using Reyna;
 
     public class GivenAUnityHelper
     {
@@ -39,8 +40,9 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPowerManager) && r.MappedToType == typeof(PowerManager)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionInfo) && r.MappedToType == typeof(ConnectionInfo)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IBlackoutTime) && r.MappedToType == typeof(BlackoutTime)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IServicePoint) && r.MappedToType == typeof(ServicePointFacade)));
 
-            Assert.Equal(16, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.Equal(17, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

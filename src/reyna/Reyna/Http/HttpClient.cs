@@ -11,19 +11,21 @@
     public sealed class HttpClient : IHttpClient
     {
         public IConnectionManager ConnectionManager { get; set; }
+        private IServicePoint servicePoint;
+        private IWebRequest webRequest;
 
-        public HttpClient(IConnectionManager connectionManager)
+        public HttpClient(IConnectionManager connectionManager, IServicePoint servicePoint,IWebRequest webRequest)
         {
             this.ConnectionManager = connectionManager;
+            this.servicePoint = servicePoint;
+            this.webRequest = webRequest;
         }
 
         public void SetCertificatePolicy(ICertificatePolicy certificatePolicy)
         {
             if (certificatePolicy != null)
             {
-#pragma warning disable 0618
-                ServicePointManager.CertificatePolicy = certificatePolicy;
-#pragma warning restore 0618
+                this.servicePoint.SetCertificatePolicy(certificatePolicy);
             }
         }
 
@@ -42,8 +44,8 @@
                     return result;
                 }
 
-                var request = WebRequest.Create(message.Url) as HttpWebRequest;
-                request.Method = "POST";
+                this.webRequest.CreateRequest(message.Url);
+                this.webRequest.Method = "POST";
 
                 foreach (string key in message.Headers.Keys)
                 {
@@ -51,14 +53,14 @@
 
                     if (key == "content-type")
                     {
-                        request.ContentType = value;
+                        this.webRequest.ContentType = value;
                         continue;
                     }
 
-                    request.Headers.Add(key, value);
+                    this.webRequest.AddHeader(key, value);
                 }
 
-                return this.RequestAndRespond(request, message.Body);
+                return this.webRequest.Send(message.Body);
             }
             catch (Exception)
             {
@@ -66,42 +68,10 @@
             }
         }
 
-        internal HttpStatusCode GetStatusCode(HttpWebResponse response)
+        private Result RequestAndRespond(string content)
         {
-            if (response == null)
-            {
-                return HttpStatusCode.ServiceUnavailable;
-            }
+            throw new NotImplementedException();
 
-            return response.StatusCode;
-        }
-
-        private Result RequestAndRespond(HttpWebRequest request, string content)
-        {
-            HttpStatusCode statusCode = HttpStatusCode.NotFound;
-
-            try
-            {
-                var contentBytes = Encoding.UTF8.GetBytes(content);
-                request.ContentLength = contentBytes.Length;
-
-                using (var stream = request.GetRequestStream())
-                {
-                    stream.Write(contentBytes, 0, contentBytes.Length);
-                }
-
-                using (var response = request.GetResponse() as HttpWebResponse)
-                {
-                    statusCode = this.GetStatusCode(response);
-                }
-            }
-            catch (WebException webException)
-            {
-                var response = webException.Response as HttpWebResponse;
-                statusCode = this.GetStatusCode(response);
-            }
-
-            return HttpStatusCodeExtensions.ToResult(statusCode);
         }
     }
 }
