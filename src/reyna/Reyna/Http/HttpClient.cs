@@ -67,11 +67,5 @@
                 return Result.PermanentError;
             }
         }
-
-        private Result RequestAndRespond(string content)
-        {
-            throw new NotImplementedException();
-
-        }
     }
 }
