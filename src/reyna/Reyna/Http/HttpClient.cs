@@ -11,22 +11,12 @@
     public sealed class HttpClient : IHttpClient
     {
         public IConnectionManager ConnectionManager { get; set; }
-        private IServicePoint servicePoint;
         private IWebRequest webRequest;
 
-        public HttpClient(IConnectionManager connectionManager, IServicePoint servicePoint,IWebRequest webRequest)
+        public HttpClient(IConnectionManager connectionManager, IWebRequest webRequest)
         {
             this.ConnectionManager = connectionManager;
-            this.servicePoint = servicePoint;
             this.webRequest = webRequest;
-        }
-
-        public void SetCertificatePolicy(ICertificatePolicy certificatePolicy)
-        {
-            if (certificatePolicy != null)
-            {
-                this.servicePoint.SetCertificatePolicy(certificatePolicy);
-            }
         }
 
         public Result CanSend()

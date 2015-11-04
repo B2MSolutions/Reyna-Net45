@@ -98,7 +98,6 @@
     <Compile Include="Connection\GivenAConnectionInfo.cs" />
     <Compile Include="Connection\GivenAConnectionManager.cs" />
     <Compile Include="GivenAUnityHelper.cs" />
-    <Compile Include="Http\GivenAnAcceptAllCertificatePolicy.cs" />
     <Compile Include="Http\GivenAnHttpClient.cs" />
     <Compile Include="Http\GivenAnHttpStatusCode.cs" />
     <Compile Include="Power\GivenAPowerManager.cs" />

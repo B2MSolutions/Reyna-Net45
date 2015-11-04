@@ -27,7 +27,7 @@
 
         public GivenAReynaService()
         {
-            this.service = new ReynaService(null, null, this.unity.GetContainer());
+            this.service = new ReynaService(null, this.unity.GetContainer());
             this.httpClient = this.unity.mockHttpClient;
             this.preferences = this.unity.mockPreferences;
             this.persistentStore = this.unity.mockSqlStore;
@@ -55,7 +55,7 @@
         {
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
-            ReynaService service = new ReynaService(null, null, container);
+            ReynaService service = new ReynaService(null, container);
             helper.mockStoreService.Verify(s => s.Initialize(helper.mockVolatileStore.Object, helper.mockSqlStore.Object), Times.Exactly(1));
         }
 
@@ -64,7 +64,7 @@
         {
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
-            ReynaService service = new ReynaService(null, null, container);
+            ReynaService service = new ReynaService(null, container);
             helper.mockForwardService.Verify(s => s.Initialize(helper.mockSqlStore.Object, helper.mockHttpClient.Object, helper.mockNetworkStateService.Object, It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
         }
 
@@ -167,25 +167,6 @@
         }
 
         [Fact]
-        public void WhenCreatingAReynaServiceWithACertificatePolicyShouldSetCertificatePolicyOnHttpClient()
-        {
-            var helper = new TestUnityHelper();
-            var container = helper.GetContainer();
-            Mock<ICertificatePolicy> policy = new Mock<ICertificatePolicy>();
-            ReynaService service = new ReynaService(null, policy.Object, container);
-            helper.mockHttpClient.Verify(h => h.SetCertificatePolicy(policy.Object), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void WhenCreatingAReynaServiceWithNoCertificatePolicyShouldNotSetCertificatePolicyOnHttpClient()
-        {
-            var helper = new TestUnityHelper();
-            var container = helper.GetContainer();
-            ReynaService service = new ReynaService(null, null, container);
-            helper.mockHttpClient.Verify(h => h.SetCertificatePolicy(It.IsAny<ICertificatePolicy>()), Times.Never);
-        }
-
-        [Fact]
         public void WhenCallingStartShouldStartAllServices()
         {
             this.service.Start();
@@ -217,7 +198,7 @@
         {
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
-            ReynaService service = new ReynaService(null, null, container);
+            ReynaService service = new ReynaService(null, container);
             service.StoreService = null;
             service.ForwardService = null;
             service.NetworkStateService = null;
@@ -233,7 +214,7 @@
             byte[] bytes = Encoding.ASCII.GetBytes("password");
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
-            ReynaService service = new ReynaService(bytes, null, container);
+            ReynaService service = new ReynaService(bytes, container);
             Assert.True(bytes.SequenceEqual(service.Password));
         }
 
@@ -243,7 +224,7 @@
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
             byte[] bytes = Encoding.ASCII.GetBytes("password");
-            ReynaService service = new ReynaService(bytes, null, container);
+            ReynaService service = new ReynaService(bytes, container);
             helper.mockEncryptionChecker.Setup(m => m.DbEncrypted()).Returns(false);
 
             service.Start();
@@ -257,7 +238,7 @@
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
             byte[] bytes = Encoding.ASCII.GetBytes("password");
-            ReynaService service = new ReynaService(bytes, null, container);
+            ReynaService service = new ReynaService(bytes, container);
             helper.mockEncryptionChecker.Setup(m => m.DbEncrypted()).Returns(true);
 
             service.Start();
@@ -270,7 +251,7 @@
         {
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
-            ReynaService service = new ReynaService(null, null, container);
+            ReynaService service = new ReynaService(null, container);
 
             service.Start();
 
@@ -294,7 +275,7 @@
 
             helper.mockSqlStore.SetupSet(s => s.Password = bytes).Verifiable();
 
-            ReynaService service = new ReynaService(bytes, null, container);
+            ReynaService service = new ReynaService(bytes, container);
 
             helper.mockSqlStore.VerifySet(s => s.Password=bytes, Times.Exactly(1));
         }
@@ -307,7 +288,7 @@
 
             helper.mockSqlStore.SetupSet(s => s.Password = It.IsAny<byte[]>()).Verifiable();
 
-            ReynaService service = new ReynaService(null, null, container);
+            ReynaService service = new ReynaService(null, container);
 
             helper.mockSqlStore.VerifySet(s => s.Password = It.IsAny<byte[]>(), Times.Never);
         }

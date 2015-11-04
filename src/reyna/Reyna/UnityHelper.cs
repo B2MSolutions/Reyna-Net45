@@ -30,7 +30,6 @@
             container.RegisterType<IPowerManager, PowerManager>();
             container.RegisterType<IConnectionInfo, ConnectionInfo>();
             container.RegisterType<IBlackoutTime, BlackoutTime>();
-            container.RegisterType<IServicePoint, ServicePointFacade>();
             container.RegisterType<IWebRequest, ReynaWebRequest>();
 
             return container;

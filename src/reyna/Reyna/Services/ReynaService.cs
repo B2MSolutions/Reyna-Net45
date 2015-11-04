@@ -2,7 +2,6 @@
 {
     using Microsoft.Practices.Unity;
     using Reyna.Interfaces;
-    using System.Net;
 
     public sealed class ReynaService : IReyna
     {
@@ -18,15 +17,15 @@
         internal INetworkStateService NetworkStateService { get; set; }
         internal byte[] Password { get; set; }
 
-        public ReynaService() : this(null, null)
+        public ReynaService() : this(null)
         {
         }
 
-        public ReynaService(byte[] password, ICertificatePolicy certificatePolicy) : this(password, certificatePolicy, UnityHelper.GetContainer())
+        public ReynaService(byte[] password) : this(password, UnityHelper.GetContainer())
         {
         }
 
-        internal ReynaService(byte[] password, ICertificatePolicy certificatePolicy, IUnityContainer container)
+        internal ReynaService(byte[] password, IUnityContainer container)
         {
             this.HttpClient = container.Resolve<IHttpClient>();
             this.Preferences = container.Resolve<IPreferences>();
@@ -45,11 +44,6 @@
             if (password != null)
             {
                 this.PersistentStore.Password = password;
-            }
-         
-            if (certificatePolicy != null)
-            {
-                this.HttpClient.SetCertificatePolicy(certificatePolicy);
             }
         }
 
