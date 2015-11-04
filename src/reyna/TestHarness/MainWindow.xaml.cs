@@ -26,7 +26,7 @@ namespace TestHarness
         public MainWindow()
         {
             InitializeComponent();
-            this.reyna = new ReynaService(null, null);
+            this.reyna = new ReynaService(null);
         }
 
         private void startReynaButton_Click(object sender, RoutedEventArgs e)
