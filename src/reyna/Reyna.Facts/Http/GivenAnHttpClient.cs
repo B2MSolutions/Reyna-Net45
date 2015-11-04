@@ -1,6 +1,4 @@
-﻿
-
-namespace Reyna.Facts.Http
+﻿namespace Reyna.Facts.Http
 {
     using Moq;
     using Reyna.Interfaces;
@@ -12,35 +10,14 @@ namespace Reyna.Facts.Http
     {
         private HttpClient httpClient;
         private Mock<IConnectionManager> connectionManager;
-        private Mock<IServicePoint> servicePoint;
         private Mock<IWebRequest> webRequest;
 
         public GivenAnHttpClient()
         {
             this.connectionManager = new Mock<IConnectionManager>();
-            this.servicePoint = new Mock<IServicePoint>();
             this.webRequest = new Mock<IWebRequest>();
 
-            this.httpClient = new HttpClient(connectionManager.Object, this.servicePoint.Object, this.webRequest.Object);
-        }
-
-        [Fact]
-        public void whenCallingSetCertificatePolicyWithACertificateShouldCallServicePoint()
-        {
-            Mock<ICertificatePolicy> certificatePolicy = new Mock<ICertificatePolicy>();
-
-            this.httpClient.SetCertificatePolicy(certificatePolicy.Object);
-
-            this.servicePoint.Verify(sp => sp.SetCertificatePolicy(certificatePolicy.Object), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void whenCallingSetCertificatePolicyWithNoCertificateShouldNotCallServicePoint()
-        {
-            this.httpClient.SetCertificatePolicy(null);
-            this.connectionManager.SetupGet(cm => cm.CanSend).Returns(Result.Ok);
-
-            this.servicePoint.Verify(sp => sp.SetCertificatePolicy(It.IsAny<ICertificatePolicy>()), Times.Never);
+            this.httpClient = new HttpClient(connectionManager.Object, this.webRequest.Object);
         }
 
         [Theory]
