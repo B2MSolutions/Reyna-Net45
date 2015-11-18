@@ -1,4 +1,5 @@
-﻿namespace Reyna
+﻿
+namespace Reyna
 {
     using Microsoft.Practices.Unity;
     using Reyna.Interfaces;
@@ -31,6 +32,8 @@
             container.RegisterType<IConnectionInfo, ConnectionInfo>();
             container.RegisterType<IBlackoutTime, BlackoutTime>();
             container.RegisterType<IWebRequest, ReynaWebRequest>();
+
+            container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 
             return container;
         }

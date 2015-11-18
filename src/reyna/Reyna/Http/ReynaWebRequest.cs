@@ -8,8 +8,15 @@ namespace Reyna
 
     public class ReynaWebRequest : IWebRequest
     {
+        private IReynaLogger Logger { get; set; }
+
         private HttpWebRequest httpRequest;
-        
+
+        public ReynaWebRequest(IReynaLogger logger)
+        {
+            Logger = logger;
+        }
+
         public void CreateRequest(Uri uri)
         {
             this.httpRequest = WebRequest.Create(uri) as HttpWebRequest;
@@ -26,7 +33,6 @@ namespace Reyna
             {
                 this.httpRequest.Method = value;
             }
-
         }
 
         public void AddHeader(string key, string value) 
@@ -70,6 +76,7 @@ namespace Reyna
             {
                 var response = webException.Response as HttpWebResponse;
                 statusCode = this.GetStatusCode(response);
+                Logger.Error("ReynaWebRequest.Send Error {0} Status code {1}", webException.ToString(), statusCode);
             }
 
             return HttpStatusCodeExtensions.ToResult(statusCode);
@@ -84,6 +91,5 @@ namespace Reyna
 
             return response.StatusCode;
         }
-
     }
 }
