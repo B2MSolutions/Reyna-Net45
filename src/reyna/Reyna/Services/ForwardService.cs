@@ -19,6 +19,8 @@ namespace Reyna
             Logger = logger;
         }
         
+        private bool _snoozing;
+
         protected override void ThreadStart()
         {
             while (!this.Terminate)
@@ -32,12 +34,18 @@ namespace Reyna
             this.WaitHandle.WaitOne();
             IMessage message = null;
             Logger.Info("Reyna.ForwardService DoWork enter");
-            while (!this.Terminate && (message = this.SourceStore.Get()) != null)
+            while (!this.Terminate && !_snoozing && (message = this.SourceStore.Get()) != null)
             {
                 var result = this.HttpClient.Post(message);
                 if (result == Result.TemporaryError)
                 {
-                    Thread.Sleep(this.TemporaryErrorMilliseconds);
+                    // Schedule a retry, after a suitable snooze.
+
+                    _snoozing = true;
+
+                    var timer = new System.Timers.Timer{ AutoReset = false, Enabled = true, Interval = this.TemporaryErrorMilliseconds };
+                    timer.Elapsed += (source, args) => { _snoozing = false; this.WaitHandle.Set(); };
+
                     break;
                 }
 
