@@ -146,10 +146,9 @@ namespace Reyna
             this.VolatileStore.Add(message);
         }
 
-        public void EnableLogging(ReynaLogger.LogHandler logger)
+        public void EnableLogging(ILoggerInterface loggerAdapter)
         {
-           (Logger as ReynaLogger).Initialise(logger);
-           
+            Logger.Initialise(loggerAdapter);   
             Logger.Info("ReynaService.EnableLogging");
         }
 

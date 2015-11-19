@@ -1,4 +1,6 @@
 ﻿
+using Reyna.Interfaces;
+
 namespace Reyna
 {
     public class ReynaLogger : IReynaLogger
@@ -9,48 +11,46 @@ namespace Reyna
         private const uint LogInfo =    3;
         private const uint LogVerbose = 4;
 
-        public delegate void LogHandler(uint level, string format, params object[] args);
-
-        private LogHandler logHandler;
+        private ILoggerInterface LogHandler;
 
         public ReynaLogger()
         {
-            logHandler = null;
+            LogHandler = null;
         }
 
-        public void Initialise(LogHandler logger)
+        public void Initialise(ILoggerInterface logger)
         {
-            logHandler = logger;
+            LogHandler = logger;
         }
 
         public void Error(string msg, params object[] args)
         {
-            if (logHandler != null)
-                logHandler(LogError, msg, args);
+            if (LogHandler != null)
+                LogHandler.LogDelegate(LogError, msg, args);
         }
 
         public void Warn(string msg, params object[] args)
         {
-            if (logHandler != null)
-                logHandler(LogWarn, msg, args);
+            if (LogHandler != null)
+                LogHandler.LogDelegate(LogWarn, msg, args);
         }
 
         public void Debug(string msg, params object[] args)
         {
-            if (logHandler != null)
-                logHandler(LogDebug, msg, args);
+            if (LogHandler != null)
+                LogHandler.LogDelegate(LogDebug, msg, args);
         }
 
         public void Info(string msg, params object[] args)
         {
-            if (logHandler != null)
-                logHandler(LogInfo, msg, args);
+            if (LogHandler != null)
+                LogHandler.LogDelegate(LogInfo, msg, args);
         }
    
         public void Verbose(string msg, params object[] args)
         {
-            if (logHandler != null)
-                logHandler(LogVerbose, msg, args);
+            if (LogHandler != null)
+                LogHandler.LogDelegate(LogVerbose, msg, args);
         }
     }
 }

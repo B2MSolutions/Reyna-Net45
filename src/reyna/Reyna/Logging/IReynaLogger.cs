@@ -1,9 +1,11 @@
 ﻿
+using Reyna.Interfaces;
+
 namespace Reyna
 {
     public interface IReynaLogger
     {
-        void Initialise(ReynaLogger.LogHandler logger);
+        void Initialise(ILoggerInterface logger);
 
         void Error(string msg, params object[] args);
         void Warn(string format, params object[] args);
