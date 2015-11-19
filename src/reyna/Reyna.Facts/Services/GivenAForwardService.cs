@@ -89,7 +89,7 @@
         [Fact]
         public void whenCallingDoWorkAndHttpClientReturnsTemporaryErrorShouldNotRemoveMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 1, 1);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
