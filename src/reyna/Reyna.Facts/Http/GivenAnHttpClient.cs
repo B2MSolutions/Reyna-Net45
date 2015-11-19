@@ -11,13 +11,14 @@
         private HttpClient httpClient;
         private Mock<IConnectionManager> connectionManager;
         private Mock<IWebRequest> webRequest;
+        private readonly Mock<IReynaLogger> loggerMock;
 
         public GivenAnHttpClient()
         {
             this.connectionManager = new Mock<IConnectionManager>();
             this.webRequest = new Mock<IWebRequest>();
-
-            this.httpClient = new HttpClient(connectionManager.Object, this.webRequest.Object);
+            this.loggerMock = new Mock<IReynaLogger>();
+            this.httpClient = new HttpClient(connectionManager.Object, webRequest.Object, loggerMock.Object);
         }
 
         [Theory]
