@@ -20,6 +20,7 @@
         internal Mock<IStoreService> mockStoreService = new Mock<IStoreService>();
         internal Mock<IForwardService> mockForwardService = new Mock<IForwardService>();
         internal Mock<IEncryptionChecker> mockEncryptionChecker = new Mock<IEncryptionChecker>();
+        internal Mock<IReynaLogger> mockReynaLogger = new Mock<IReynaLogger>();
 
         public IUnityContainer GetContainer()
         {
@@ -33,6 +34,7 @@
             container.RegisterInstance<IStoreService>(this.mockStoreService.Object);
             container.RegisterInstance<IForwardService>(this.mockForwardService.Object);
             container.RegisterInstance<IEncryptionChecker>(this.mockEncryptionChecker.Object);
+            container.RegisterInstance<IReynaLogger>(this.mockReynaLogger.Object);
 
             return container;
         }

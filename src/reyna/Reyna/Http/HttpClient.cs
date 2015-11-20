@@ -1,4 +1,5 @@
-﻿namespace Reyna
+﻿
+namespace Reyna
 {
     using System;
     using System.Net;
@@ -12,11 +13,13 @@
     {
         public IConnectionManager ConnectionManager { get; set; }
         private IWebRequest webRequest;
+        private IReynaLogger Logger;
 
-        public HttpClient(IConnectionManager connectionManager, IWebRequest webRequest)
+        public HttpClient(IConnectionManager connectionManager, IWebRequest webRequest, IReynaLogger logger)
         {
             this.ConnectionManager = connectionManager;
             this.webRequest = webRequest;
+            Logger = logger;
         }
 
         public Result CanSend()
@@ -28,9 +31,12 @@
         {
             try
             {
+                Logger.Info("Reyna.HttpClient Post id {0} url {1} body length {2}", message.Id,message.Url,message.Body.Length);
+
                 Result result = CanSend();
                 if (result != Result.Ok)
                 {
+                    Logger.Info("Reyna.HttpClient Post cannot send");
                     return result;
                 }
 
@@ -52,8 +58,10 @@
 
                 return this.webRequest.Send(message.Body);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Logger.Error("Reyna.HttpClient Post {0}",e);
+               
                 return Result.PermanentError;
             }
         }

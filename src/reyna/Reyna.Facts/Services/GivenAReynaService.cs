@@ -24,6 +24,7 @@
         private Mock<IForwardService> forwardService; 
         private Mock<INetworkStateService> networkStateService;
         private Mock<IEncryptionChecker> encryptionChecker;
+        private Mock<IReynaLogger> reynaLogger;
 
         public GivenAReynaService()
         {
@@ -36,6 +37,7 @@
             this.storeService = this.unity.mockStoreService;
             this.forwardService = this.unity.mockForwardService;
             this.encryptionChecker = this.unity.mockEncryptionChecker;
+            this.reynaLogger = this.unity.mockReynaLogger;
         }
 
         [Fact]
@@ -48,6 +50,7 @@
             Assert.Same(this.networkStateService.Object, this.service.NetworkStateService);
             Assert.Same(this.forwardService.Object, this.service.ForwardService);
             Assert.Same(this.encryptionChecker.Object, this.service.EncryptionChecker);
+            Assert.Same(this.reynaLogger.Object, this.service.Logger);
         }
 
         [Fact]

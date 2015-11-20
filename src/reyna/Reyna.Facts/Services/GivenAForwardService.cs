@@ -16,6 +16,7 @@
         private Mock<IHttpClient> httpClient;
         private Mock<INetworkStateService> networkStateService;
         private Mock<IRepository> persistentStore;
+        private readonly Mock<IReynaLogger> loggerMock;
 
         public GivenAForwardService()
         {
@@ -23,8 +24,9 @@
             this.httpClient = new Mock<IHttpClient>();
             this.networkStateService = new Mock<INetworkStateService>();
             this.persistentStore = new Mock<IRepository>();
+            this.loggerMock = new Mock<IReynaLogger>();
 
-            this.service = new ForwardService(this.waitHandle.Object);
+            this.service = new ForwardService(this.waitHandle.Object, loggerMock.Object);
         }
 
         [Fact]

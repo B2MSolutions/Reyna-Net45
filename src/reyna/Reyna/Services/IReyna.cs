@@ -1,7 +1,9 @@
-﻿namespace Reyna.Interfaces
+﻿
+namespace Reyna.Interfaces
 {
     public interface IReyna : IService
     {
         void Put(IMessage message);
+        void EnableLogging(ILogDelegate llog);
     }
 }

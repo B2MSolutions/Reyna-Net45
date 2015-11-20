@@ -1,7 +1,8 @@
-﻿namespace Reyna
+﻿using Microsoft.Practices.Unity;
+
+namespace Reyna
 {
-    using Microsoft.Practices.Unity;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     public sealed class ReynaService : IReyna
     {
@@ -15,6 +16,8 @@
         internal IStoreService StoreService { get; set; }
         internal IForwardService ForwardService { get; set; }
         internal INetworkStateService NetworkStateService { get; set; }
+        internal IReynaLogger Logger { get; set; }
+        
         internal byte[] Password { get; set; }
 
         public ReynaService() : this(null)
@@ -34,7 +37,9 @@
             this.NetworkStateService = container.Resolve<INetworkStateService>();
             this.StoreService = container.Resolve<IStoreService>();
             this.ForwardService = container.Resolve<IForwardService>();
-            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();   
+            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();
+
+            this.Logger = container.Resolve<IReynaLogger>();
 
             this.StoreService.Initialize(this.VolatileStore, this.PersistentStore);
             this.ForwardService.Initialize(this.PersistentStore, this.HttpClient, this.NetworkStateService, this.Preferences.ForwardServiceTemporaryErrorBackout, this.Preferences.ForwardServiceMessageBackout);
@@ -106,6 +111,8 @@
 
         public void Start()
         {
+            Logger.Info("Reyna.ReynaService Start enter");  
+          
             if (this.Password != null && this.Password.Length > 0)
             {
                 if (!this.EncryptionChecker.DbEncrypted())
@@ -117,18 +124,30 @@
             this.StoreService.Start();
             this.ForwardService.Start();
             this.NetworkStateService.Start();
+
+            Logger.Info("Reyna.ReynaService Start exit");   
         }
 
         public void Stop()
         {
+            Logger.Info("Reyna.ReynaService Stop enter");  
+
             this.NetworkStateService.Stop();
             this.ForwardService.Stop();
             this.StoreService.Stop();
+            
+            Logger.Info("Reyna.ReynaService Stop exit");  
         }
 
         public void Put(IMessage message)
         {
             this.VolatileStore.Add(message);
+        }
+
+        public void EnableLogging(ILogDelegate logDelegate)
+        {
+            Logger.Initialise(logDelegate);   
+            Logger.Info("ReynaService.EnableLogging");
         }
 
         public void Dispose()
