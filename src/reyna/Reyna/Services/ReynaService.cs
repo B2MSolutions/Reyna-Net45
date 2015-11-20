@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Practices.Unity;
 
 namespace Reyna
 {
-    using Microsoft.Practices.Unity;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     public sealed class ReynaService : IReyna
     {
@@ -146,9 +144,9 @@ namespace Reyna
             this.VolatileStore.Add(message);
         }
 
-        public void EnableLogging(ILoggerInterface loggerAdapter)
+        public void EnableLogging(ILogDelegate logDelegate)
         {
-            Logger.Initialise(loggerAdapter);   
+            Logger.Initialise(logDelegate);   
             Logger.Info("ReynaService.EnableLogging");
         }
 

@@ -88,7 +88,7 @@
     <Compile Include="Http\IWebRequest.cs" />
     <Compile Include="Http\Result.cs" />
     <Compile Include="Http\ReynaWebRequest.cs" />
-    <Compile Include="Logging\ILoggerInterface.cs" />
+    <Compile Include="Logging\ILogDelegate.cs" />
     <Compile Include="NativeMethods\NativeMethods.cs" />
     <Compile Include="Network\INetwork.cs" />
     <Compile Include="Network\Network.cs" />

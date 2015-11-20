@@ -1,11 +1,11 @@
 ﻿
-using Reyna.Interfaces;
-
 namespace Reyna
 {
+    using Interfaces;
+
     public interface IReynaLogger
     {
-        void Initialise(ILoggerInterface logger);
+        void Initialise(ILogDelegate logger);
 
         void Error(string msg, params object[] args);
         void Warn(string format, params object[] args);
