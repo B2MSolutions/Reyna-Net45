@@ -76,7 +76,7 @@ namespace Reyna
             {
                 var response = webException.Response as HttpWebResponse;
                 statusCode = this.GetStatusCode(response);
-                Logger.Error("ReynaWebRequest.Send Error {0} Status code {1}", webException.ToString(), statusCode);
+                Logger.Error("ReynaWebRequest.Send Error {0} Status code {1}", webException, statusCode);
             }
 
             return HttpStatusCodeExtensions.ToResult(statusCode);
