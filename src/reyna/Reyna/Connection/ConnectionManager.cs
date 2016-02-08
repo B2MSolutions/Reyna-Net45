@@ -38,12 +38,12 @@
                     Preferences.SaveCellularDataAsWwanForBackwardsCompatibility();
                 }
 
-                if (this.Preferences.OnChargeBlackout && this.PowerManager.IsBatteryCharging())
+                if (this.Preferences.OnChargeBlackout && this.PowerManager.IsPowerLineConnected())
                 {
                     return Result.Blackout;
                 }
 
-                if (this.Preferences.OffChargeBlackout && !this.PowerManager.IsBatteryCharging())
+                if (this.Preferences.OffChargeBlackout && !this.PowerManager.IsPowerLineConnected())
                 {
                     return Result.Blackout;
                 }

@@ -1,35 +1,40 @@
-﻿namespace Reyna.Facts
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Reyna.Power;
-    using Xunit;
+﻿using System.Windows.Forms;
+using Moq;
+using Reyna.Power;
+using Xunit;
 
+namespace Reyna.Facts
+{
     public class GivenAPowerManager
     {
+        private readonly PowerManager _powerManager;
+        private readonly Mock<IPowerStatusWrapper> _mockPowerStatusWrapper;
+
+        public GivenAPowerManager()
+        {
+            _mockPowerStatusWrapper = new Mock<IPowerStatusWrapper>();
+            _powerManager = new PowerManager(_mockPowerStatusWrapper.Object);
+        }
+
         [Fact]
         public void WhenCallingIsBatteryChargingAndBatteryIsChargingShouldReturnTrue()
         {
-            NativeMethods.ACLineStatus = 1;
-            NativeMethods.SystemPowerStatusExResult = 1;
-            Assert.True(new PowerManager().IsBatteryCharging());
+            _mockPowerStatusWrapper.SetupGet(ps => ps.PowerLineStatus).Returns(PowerLineStatus.Online);
+            Assert.True(_powerManager.IsPowerLineConnected());
         }
 
         [Fact]
         public void WhenCallingIsBatteryChargingAndBatteryIsNotChargingShouldReturnFalse()
         {
-            NativeMethods.ACLineStatus = 0;
-            NativeMethods.SystemPowerStatusExResult = 1;
-            Assert.False(new PowerManager().IsBatteryCharging());
+            _mockPowerStatusWrapper.SetupGet(ps => ps.PowerLineStatus).Returns(PowerLineStatus.Offline);
+            Assert.False(_powerManager.IsPowerLineConnected());
         }
 
         [Fact]
         public void WhenCallingIsBatteryChargingAndBatteryFailedToGetPowerStatusShouldReturnFalse()
         {
-            NativeMethods.SystemPowerStatusExResult = 0;
-            Assert.False(new PowerManager().IsBatteryCharging());
+            _mockPowerStatusWrapper.SetupGet(ps => ps.PowerLineStatus).Returns(null);
+            Assert.False(_powerManager.IsPowerLineConnected());
         }
     }
 }
