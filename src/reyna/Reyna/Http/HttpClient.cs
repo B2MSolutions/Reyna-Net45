@@ -36,7 +36,7 @@ namespace Reyna
                 Result result = CanSend();
                 if (result != Result.Ok)
                 {
-                    Logger.Info("Reyna.HttpClient Post cannot send");
+                    Logger.Info("Reyna.HttpClient Post cannot send: {0}", result.ToString());
                     return result;
                 }
 
@@ -55,6 +55,8 @@ namespace Reyna
 
                     this.webRequest.AddHeader(key, value);
                 }
+
+                Logger.Info("Reyna.HttpClient Post can send: {0}", result.ToString());
 
                 return this.webRequest.Send(message.Body);
             }
