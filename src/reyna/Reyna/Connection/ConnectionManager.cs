@@ -1,34 +1,30 @@
 ﻿namespace Reyna
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using Reyna.Interfaces;
-    using Reyna.Power;
+    using Interfaces;
 
     public class ConnectionManager : IConnectionManager
     {
-        internal IPreferences Preferences { get; set; }
+        private IPreferences Preferences { get; set; }
 
-        internal IPowerManager PowerManager { get; set; }
+        private IPowerManager PowerManager { get; set; }
 
-        internal IConnectionInfo ConnectionInfo { get; set; }
+        private IConnectionInfo ConnectionInfo { get; set; }
 
-        internal IBlackoutTime BlackoutTime  { get; set; }
+        private IBlackoutTime BlackoutTime  { get; set; }
 
         public ConnectionManager(IPreferences preferences, IPowerManager powerManager, IConnectionInfo connectionInfo, IBlackoutTime blackoutTime)
         {
-            this.Preferences = preferences;
-            this.PowerManager = powerManager;
-            this.ConnectionInfo = connectionInfo;
-            this.BlackoutTime = blackoutTime;
+            Preferences = preferences;
+            PowerManager = powerManager;
+            ConnectionInfo = connectionInfo;
+            BlackoutTime = blackoutTime;
         }
 
         public Result CanSend
         {
             get
             {
-                if (!this.ConnectionInfo.Connected)
+                if (!ConnectionInfo.Connected)
                 {
                     return Result.NotConnected;
                 }
@@ -38,27 +34,27 @@
                     Preferences.SaveCellularDataAsWwanForBackwardsCompatibility();
                 }
 
-                if (this.Preferences.OnChargeBlackout && this.PowerManager.IsPowerLineConnected())
+                if (Preferences.OnChargeBlackout && PowerManager.IsPowerLineConnected())
                 {
                     return Result.Blackout;
                 }
 
-                if (this.Preferences.OffChargeBlackout && !this.PowerManager.IsPowerLineConnected())
+                if (Preferences.OffChargeBlackout && !PowerManager.IsPowerLineConnected())
                 {
                     return Result.Blackout;
                 }
 
-                if (this.Preferences.RoamingBlackout && this.ConnectionInfo.Roaming)
+                if (Preferences.RoamingBlackout && ConnectionInfo.Roaming)
                 {
                     return Result.Blackout;
                 } 
 
-                if (!this.CanSendNow(this.BlackoutTime, this.Preferences.WlanBlackoutRange) && this.ConnectionInfo.Wifi)
+                if (!CanSendNow(BlackoutTime, Preferences.WlanBlackoutRange) && ConnectionInfo.Wifi)
                 {
                     return Result.Blackout;
                 }
 
-                if (!this.CanSendNow(this.BlackoutTime, this.Preferences.WwanBlackoutRange) && this.ConnectionInfo.Mobile)
+                if (!CanSendNow(BlackoutTime, Preferences.WwanBlackoutRange) && ConnectionInfo.Mobile)
                 {
                     return Result.Blackout;
                 }
