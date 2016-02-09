@@ -21,12 +21,20 @@ namespace Reyna
 
         public NetworkInterfaceType NetworkInterfaceType
         {
-            get { return _networkInterface?.NetworkInterfaceType ?? NetworkInterfaceType.Unknown; }
+            get
+            {
+                if (_networkInterface == null) return NetworkInterfaceType.Unknown;
+                return _networkInterface.NetworkInterfaceType;
+            }
         }
 
         public OperationalStatus OperationalStatus
         {
-            get { return _networkInterface?.OperationalStatus ?? OperationalStatus.Unknown; }
+            get
+            {
+                if (_networkInterface == null) return OperationalStatus.Unknown;
+                return _networkInterface.OperationalStatus;
+            }
         }
     }
 }
