@@ -8,10 +8,10 @@
         private readonly IConnectionCost _connectionCost;
         private readonly INetworkInterfaceWrapper _networkInterfaceWrapper;
 
-        public ConnectionInfo(IConnectionCost connectionCost, INetworkInterfaceWrapper networkInterfaceWrapper)
+        public ConnectionInfo(IConnectionCost connectionCost = null, INetworkInterfaceWrapper networkInterfaceWrapper = null)
         {
-            _connectionCost = connectionCost;
-            _networkInterfaceWrapper = networkInterfaceWrapper;
+            _connectionCost = connectionCost ?? new ConnectionCost();
+            _networkInterfaceWrapper = networkInterfaceWrapper ?? new NetworkInterfaceWrapper();
         }
 
         public bool Connected

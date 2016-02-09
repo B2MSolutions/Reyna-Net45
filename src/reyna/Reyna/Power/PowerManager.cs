@@ -8,9 +8,9 @@ namespace Reyna.Power
     {
         private readonly IPowerStatusWrapper _powerStatusWrapper;
 
-        public PowerManager(IPowerStatusWrapper powerStatusWrapper)
+        public PowerManager(IPowerStatusWrapper powerStatusWrapper = null)
         {
-            _powerStatusWrapper = powerStatusWrapper;
+            _powerStatusWrapper = powerStatusWrapper ?? new PowerStatusWrapper();
         }
 
         public bool IsPowerLineConnected()

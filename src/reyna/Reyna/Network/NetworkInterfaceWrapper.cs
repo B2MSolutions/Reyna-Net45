@@ -7,7 +7,7 @@ namespace Reyna
     {
         private readonly NetworkInterface _networkInterface;
 
-        public NetworkInterfaceWrapper(NetworkInterface networkInterface)
+        public NetworkInterfaceWrapper(NetworkInterface networkInterface = null)
         {
             _networkInterface = networkInterface;
         }
@@ -21,12 +21,12 @@ namespace Reyna
 
         public NetworkInterfaceType NetworkInterfaceType
         {
-            get { return _networkInterface.NetworkInterfaceType; }
+            get { return _networkInterface?.NetworkInterfaceType ?? NetworkInterfaceType.Unknown; }
         }
 
         public OperationalStatus OperationalStatus
         {
-            get { return _networkInterface.OperationalStatus; }
+            get { return _networkInterface?.OperationalStatus ?? OperationalStatus.Unknown; }
         }
     }
 }

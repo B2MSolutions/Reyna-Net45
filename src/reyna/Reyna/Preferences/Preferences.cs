@@ -18,9 +18,9 @@
         private const string TemporaryErrorBackout = "TemporaryErrorBackout";
         private const string MessageBackout = "MessageBackout";
 
-        public Preferences(IRegistry registry)
+        public Preferences(IRegistry registry = null)
         {
-            _registry = registry;
+            _registry = registry ?? new Registry();
         }
 
         public TimeRange CellularDataBlackout
