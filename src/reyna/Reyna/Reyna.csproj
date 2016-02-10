@@ -102,7 +102,9 @@
     <Compile Include="Network\NetworkInterfaceWrapper.cs" />
     <Compile Include="Network\NetworkInterfaceWrapperFactory.cs" />
     <Compile Include="Power\IPowerManager.cs" />
+    <Compile Include="Power\IPowerStatusWrapper.cs" />
     <Compile Include="Power\PowerManager.cs" />
+    <Compile Include="Power\PowerStatusWrapper.cs" />
     <Compile Include="Power\SystemPowerStatus.cs" />
     <Compile Include="Preferences\IPreferences.cs" />
     <Compile Include="Preferences\IRegistry.cs" />

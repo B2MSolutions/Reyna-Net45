@@ -28,6 +28,7 @@ namespace Reyna
             container.RegisterType<IWebRequest, ReynaWebRequest>();
             container.RegisterType<INetworkInterfaceWrapper, NetworkInterfaceWrapper>();
             container.RegisterType<INetworkInterfaceWrapperFactory, NetworkInterfaceWrapperFactory>();
+            container.RegisterType<IPowerStatusWrapper, PowerStatusWrapper>();
 
             container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 
