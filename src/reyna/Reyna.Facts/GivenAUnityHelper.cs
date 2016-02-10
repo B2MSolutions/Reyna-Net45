@@ -42,8 +42,13 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IBlackoutTime) && r.MappedToType == typeof(BlackoutTime)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IWebRequest) && r.MappedToType == typeof(ReynaWebRequest)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IReynaLogger) && r.MappedToType == typeof(IReynaLogger)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IRegistry) && r.MappedToType == typeof(Registry)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPowerStatusWrapper) && r.MappedToType == typeof(PowerStatusWrapper)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapper) && r.MappedToType == typeof(NetworkInterfaceWrapper)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapperFactory) && r.MappedToType == typeof(NetworkInterfaceWrapperFactory)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionCost) && r.MappedToType == typeof(ConnectionCost)));
 
-            Assert.Equal(18, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.Equal(23, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }
