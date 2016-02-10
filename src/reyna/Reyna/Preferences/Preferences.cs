@@ -6,6 +6,7 @@
     public class Preferences : IPreferences
     {
         private readonly IRegistry _registry;
+
         private const string SubKey = @"Software\Reyna";
         private const string StorageSizeLimitKeyName = "StorageSizeLimit";
         private const string WlanBlackoutRangeKeyName = "WlanBlackoutRange";
@@ -18,9 +19,9 @@
         private const string TemporaryErrorBackout = "TemporaryErrorBackout";
         private const string MessageBackout = "MessageBackout";
 
-        public Preferences(IRegistry registry = null)
+        public Preferences(IRegistry registry)
         {
-            _registry = registry ?? new Registry();
+            _registry = registry;
         }
 
         public TimeRange CellularDataBlackout

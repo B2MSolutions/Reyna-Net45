@@ -12,7 +12,7 @@ namespace Reyna.Facts
         public GivenAPreferences()
         {
             _mockRegistry = new Mock<IRegistry>();
-            this.Preferences = new Preferences(_mockRegistry.Object);
+            Preferences = new Preferences(_mockRegistry.Object);
         }
 
         public Preferences Preferences { get; set; }
@@ -107,7 +107,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenResetWlanBlackoutRangeShouldDeleteValuesFromRegistry()
         {
-            this.Preferences.ResetWlanBlackoutRange();
+            Preferences.ResetWlanBlackoutRange();
 
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "WlanBlackoutRange"));
         }
@@ -115,9 +115,9 @@ namespace Reyna.Facts
         [Fact]
         public void WhenSettingWlanBlackoutRangeWithInvalidRangeShouldResetIt()
         {
-            this.Preferences.SetWlanBlackoutRange("00");
+            Preferences.SetWlanBlackoutRange("00");
 
-            var range = this.Preferences.WlanBlackoutRange;
+            var range = Preferences.WlanBlackoutRange;
 
             Assert.Null(range);
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "WlanBlackoutRange"));
@@ -126,9 +126,9 @@ namespace Reyna.Facts
         [Fact]
         public void WhenSettingWwanBlackoutRangeWithInvalidRangeShouldResetIt()
         {
-            this.Preferences.SetWwanBlackoutRange("00");
+            Preferences.SetWwanBlackoutRange("00");
 
-            var range = this.Preferences.WwanBlackoutRange;
+            var range = Preferences.WwanBlackoutRange;
 
             Assert.Null(range);
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "WwanBlackoutRange"));
@@ -137,7 +137,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenNoWlanBlackoutRangeThenGetWlanBlackoutRangeShouldReturnNull()
         {
-            var range = this.Preferences.WlanBlackoutRange;
+            var range = Preferences.WlanBlackoutRange;
 
             Assert.Null(range);
         }
@@ -145,7 +145,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenNoWwanBlackoutRangeThenGetWlanBlackoutRangeShouldReturnNull()
         {
-            var range = this.Preferences.WwanBlackoutRange;
+            var range = Preferences.WwanBlackoutRange;
 
             Assert.Null(range);
         }
@@ -153,7 +153,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGetWlanBlackoutRangeAndNotCorrectlySavedShouldReturnNull()
         {
-            var range = this.Preferences.WlanBlackoutRange;
+            var range = Preferences.WlanBlackoutRange;
 
             Assert.Null(range);
         }
@@ -165,7 +165,7 @@ namespace Reyna.Facts
                 r => r.GetString(Registry.LocalMachine, @"Software\Reyna", "WwanBlackoutRange", It.IsAny<string>()))
                 .Returns("00:00-00:01");
 
-            var actual = this.Preferences.WwanBlackoutRange;
+            var actual = Preferences.WwanBlackoutRange;
 
             Assert.Equal("00:00-00:01", actual);
             Assert.Equal("00:00-00:01", actual);
@@ -174,7 +174,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenResetWwanBlackoutRangeShouldDeleteValuesFromRegistry()
         {
-            this.Preferences.ResetWwanBlackoutRange();
+            Preferences.ResetWwanBlackoutRange();
 
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "WwanBlackoutRange"));
         }
@@ -182,7 +182,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGetWwanBlackoutRangeAndNotCorrectlySavedShouldReturnNull()
         {
-            var range = this.Preferences.WwanBlackoutRange;
+            var range = Preferences.WwanBlackoutRange;
 
             Assert.Null(range);
         }
@@ -190,21 +190,21 @@ namespace Reyna.Facts
         [Fact]
         public void WhenSettingRoamingBlackoutShouldSetValueInRegistry()
         {
-            this.Preferences.SetRoamingBlackout(true);
+            Preferences.SetRoamingBlackout(true);
             _mockRegistry.Verify(r => r.SetDWord(Registry.LocalMachine, @"Software\Reyna", "RoamingBlackout", 1));
         }
 
         [Fact]
         public void WhenSettingOffChargeBlackoutShouldSetValueInRegistry()
         {
-            this.Preferences.SetOffChargeBlackout(true);
+            Preferences.SetOffChargeBlackout(true);
             _mockRegistry.Verify(r => r.SetDWord(Registry.LocalMachine, @"Software\Reyna", "OffChargeBlackout", 1));
         }
 
         [Fact]
         public void WhenSettingOnChargeBlackoutShouldSetValueInRegistry()
         {
-            this.Preferences.SetOnChargeBlackout(true);
+            Preferences.SetOnChargeBlackout(true);
             _mockRegistry.Verify(r => r.SetDWord(Registry.LocalMachine, @"Software\Reyna", "OnChargeBlackout", 1));
         }
 
@@ -213,7 +213,7 @@ namespace Reyna.Facts
         {
             _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "RoamingBlackout", 1)).Returns(1);
 
-            var result = this.Preferences.RoamingBlackout;
+            var result = Preferences.RoamingBlackout;
 
             _mockRegistry.Verify(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "RoamingBlackout", 1));
             Assert.True(result);
@@ -224,7 +224,7 @@ namespace Reyna.Facts
         {
             _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "OffChargeBlackout", 0)).Returns(1);
 
-            var result = this.Preferences.OffChargeBlackout;
+            var result = Preferences.OffChargeBlackout;
 
             _mockRegistry.Verify(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "OffChargeBlackout", 0));
             Assert.True(result);
@@ -235,7 +235,7 @@ namespace Reyna.Facts
         {
             _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "OnChargeBlackout", 0)).Returns(1);
 
-            var result = this.Preferences.OnChargeBlackout;
+            var result = Preferences.OnChargeBlackout;
 
             _mockRegistry.Verify(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "OnChargeBlackout", 0));
             Assert.True(result);
@@ -244,7 +244,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenResetOnChargeBlackoutShouldDeleteValuesFromRegistry()
         {
-            this.Preferences.ResetOnChargeBlackout();
+            Preferences.ResetOnChargeBlackout();
 
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "OnChargeBlackout"));
         }
@@ -252,7 +252,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGetOnChargeBlackoutAndNotCorrectlySavedReturnFalse()
         {
-            var chargingBlackout = this.Preferences.OnChargeBlackout;
+            var chargingBlackout = Preferences.OnChargeBlackout;
 
             Assert.False(chargingBlackout);
         }
@@ -260,7 +260,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenResetOffChargeBlackoutShouldDeleteValuesFromRegistry()
         {
-            this.Preferences.ResetOffChargeBlackout();
+            Preferences.ResetOffChargeBlackout();
             
             _mockRegistry.Verify(r => r.DeleteValue(Registry.LocalMachine, @"Software\Reyna", "OffChargeBlackout"));
         }
@@ -268,7 +268,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGetOffChargeBlackoutAndNotCorrectlySavedReturnFalse()
         {
-            var dischargingBlackout = this.Preferences.OffChargeBlackout;
+            var dischargingBlackout = Preferences.OffChargeBlackout;
 
             Assert.False(dischargingBlackout);
         }

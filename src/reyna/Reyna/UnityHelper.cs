@@ -29,6 +29,7 @@ namespace Reyna
             container.RegisterType<INetworkInterfaceWrapper, NetworkInterfaceWrapper>();
             container.RegisterType<INetworkInterfaceWrapperFactory, NetworkInterfaceWrapperFactory>();
             container.RegisterType<IPowerStatusWrapper, PowerStatusWrapper>();
+            container.RegisterType<IRegistry, Registry>();
 
             container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 
