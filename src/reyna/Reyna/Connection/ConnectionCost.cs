@@ -2,7 +2,7 @@
 
 namespace Reyna
 {
-    class ConnectionCost : IConnectionCost
+    public class ConnectionCost : IConnectionCost
     {
         public bool Roaming
         {

@@ -22,16 +22,18 @@
                 {
                     foreach (var ni in _networkInterfaceWrapper.GetAllNetworkInterfaces())
                     {
-                        if (ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                        if (ni.OperationalStatus == OperationalStatus.Up &&
+                            ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                            ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
                         {
                             return true;
                         }
                     }
                 }
                 catch (Exception)
-                { 
+                {
                 }
-                
+
                 return false;
             }
         }
@@ -54,7 +56,9 @@
                                 mobileNetworkConnected = true;
                             }
                         }
-                        else if (ni.NetworkInterfaceType != NetworkInterfaceType.Loopback && ni.OperationalStatus == OperationalStatus.Up)
+                        else if (ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                                 ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                                 ni.OperationalStatus == OperationalStatus.Up)
                         {
                             otherNetworksConnected = true;
                         }
