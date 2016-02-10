@@ -65,7 +65,7 @@ namespace Reyna
             PersistentStore.ShrinkDb(limit);
         }
 
-        internal void ResetStorageSizeLimit()
+        public void ResetStorageSizeLimit()
         {
             Preferences.ResetStorageSizeLimit();
         }
