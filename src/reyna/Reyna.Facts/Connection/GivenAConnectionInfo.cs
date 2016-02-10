@@ -1,262 +1,125 @@
-﻿namespace Reyna.Facts
-{
-    using Moq;
-    using Xunit;
-    using Xunit.Extensions;
+﻿using System;
+using System.Net.NetworkInformation;
+using Moq;
+using Xunit;
 
+namespace Reyna.Facts
+{
     public class GivenAConnectionInfo
     {
-        //public GivenAConnectionInfo()
-        //{
-        //    this.ConnectionInfo = new ConnectionInfo();
-        //    this.ConnectionInfoMock = new Mock<IConnectionInfo>();
-        //    this.Registry = new Mock<IRegistry>();
-        //    this.ConnectionInfo.Registry = this.Registry.Object;
-        //}
+        public GivenAConnectionInfo()
+        {
+            _mockConnectionCost = new Mock<IConnectionCost>();
+            _mockNetworkInterface = new Mock<INetworkInterfaceWrapperFactory>();
 
-        //private Mock<IConnectionInfo> ConnectionInfoMock { get; set; }
+            _mockMobileNetworkInterface = new Mock<INetworkInterfaceWrapper>();
+            _mockMobileNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(NetworkInterfaceType.Wwanpp);
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(OperationalStatus.Down);
 
-        //private Mock<IRegistry> Registry { get; set; }
+            _mockWirelessNetworkInterface = new Mock<INetworkInterfaceWrapper>();
+            _mockWirelessNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(NetworkInterfaceType.Wireless80211);
+            _mockWirelessNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(OperationalStatus.Down);
 
-        //private ConnectionInfo ConnectionInfo { get; set; }
+            _mockNetworkInterface.Setup(nc => nc.GetAllNetworkInterfaces()).Returns(new[] { _mockWirelessNetworkInterface.Object, _mockMobileNetworkInterface.Object });
 
-        //[Fact]
-        //public void Construction()
-        //{
-        //    this.ConnectionInfo = new ConnectionInfo();
-        //    Assert.NotNull(this.ConnectionInfo);
-        //    Assert.NotNull(this.ConnectionInfo.Registry);
-        //}
+            ConnectionInfo = new ConnectionInfo(_mockConnectionCost.Object, _mockNetworkInterface.Object);
+        }
 
-        //[Fact]
-        //public void WhenNetworkInterfaceWithIpExistsShouldReturnTrueForHasConnection()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(42);
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+        private readonly Mock<IConnectionCost> _mockConnectionCost;
+        private readonly Mock<INetworkInterfaceWrapperFactory> _mockNetworkInterface;
+        private readonly Mock<INetworkInterfaceWrapper> _mockWirelessNetworkInterface;
+        private readonly Mock<INetworkInterfaceWrapper> _mockMobileNetworkInterface;
 
-        //    Assert.True(this.ConnectionInfo.Connected);
-        //}
+        private ConnectionInfo ConnectionInfo { get; set; }
 
-        //[Fact]
-        //public void WhenNetworkInterfaceWithIpExistsShouldReturnFalseForHasConnection()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(0);
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+        [Fact]
+        public void Construction()
+        {
+            Assert.NotNull(ConnectionInfo);
+        }
 
-        //    Assert.False(this.ConnectionInfo.Connected);
-        //}
+        [Theory]
+        [InlineData(true, OperationalStatus.Up)]
+        [InlineData(false, OperationalStatus.Down)]
+        public void WhenGettingConnectedShouldReturnExpected(bool expected, OperationalStatus status)
+        {
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(status);
 
-        //[Fact]
-        //public void WhenCallingMobileAndOnlyWifiAvailableShouldReturnFalse()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(42);
-        //    networkInterface.Name = "wifi";
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+            Assert.Equal(expected, ConnectionInfo.Connected);
+        }
 
-        //    Assert.False(this.ConnectionInfo.Mobile);
-        //}
+        [Theory]
+        [InlineData(true, OperationalStatus.Up)]
+        [InlineData(false, OperationalStatus.Down)]
+        public void WhenGettingMobileShouldReturnExpected(bool expected, OperationalStatus status)
+        {
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(status);
 
-        //[Fact]
-        //public void WhenCallingConnectedAndExceptionShouldReturnFalse()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+            Assert.Equal(expected, ConnectionInfo.Mobile);
+        }
 
-        //    Assert.False(this.ConnectionInfo.Connected);
-        //}
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WhenGettingRoamingShouldReturnExpected(bool expected)
+        {
+            _mockConnectionCost.Setup(ni => ni.Roaming).Returns(expected);
 
-        //[Fact]
-        //public void WhenCallingMobileAndOnlyGPRSAvailableShouldReturnTrue()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(42);
-        //    networkInterface.Name = "cellular line";
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+            Assert.Equal(expected, ConnectionInfo.Roaming);
+        }
 
-        //    Assert.True(this.ConnectionInfo.Mobile);
-        //}
+        [Theory]
+        [InlineData(true, OperationalStatus.Up)]
+        [InlineData(false, OperationalStatus.Down)]
+        public void WhenGettingWifiShouldReturnExpected(bool expected, OperationalStatus status)
+        {
+            _mockWirelessNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(status);
 
-        //[Fact]
-        //public void WhenCallingMobileAndOnlyGPRSAvailableButNotConnectedShouldReturnFalse()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(0);
-        //    networkInterface.Name = "cellular line";
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
+            Assert.Equal(expected, ConnectionInfo.Wifi);
+        }
 
-        //    Assert.False(this.ConnectionInfo.Mobile);
-        //}
+        [Theory]
+        [InlineData(NetworkInterfaceType.Wman)]
+        [InlineData(NetworkInterfaceType.Wwanpp)]
+        [InlineData(NetworkInterfaceType.Wwanpp2)]
+        public void WhenGettingMobileShouldWorkForEachTypeOfMobileNetworkInterface(NetworkInterfaceType type)
+        {
+            _mockMobileNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(type);
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(OperationalStatus.Up);
 
-        //[Fact]
-        //public void WhenCallingMobileAndGPRSAndWifiConnectedShouldReturnFalse()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(43);
-        //    networkInterface.Name = "cellular line";
+            Assert.True(ConnectionInfo.Mobile);
+        }
 
-        //    var wifi = new NetworkInterface();
-        //    wifi.CurrentIpAddress = new System.Net.IPAddress(43);
-        //    wifi.Name = "wifi";
+        [Fact]
+        public void WhenGettingConnectedAndThrowsShouldCatchAndReturnFalse()
+        {
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Throws(new Exception());
 
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface, wifi };
+            Assert.False(ConnectionInfo.Connected);
+        }
 
-        //    Assert.False(this.ConnectionInfo.Mobile);
-        //}
+        [Fact]
+        public void WhenGettingMobileAndThrowsShouldCatchAndReturnFalse()
+        {
+            _mockMobileNetworkInterface.Setup(ni => ni.OperationalStatus).Throws(new Exception());
+            
+            Assert.False(ConnectionInfo.Mobile);
+        }
 
-        //[Fact]
-        //public void WhenCallingMobileAndGPRSIsConnectedAndWifiNotConnectedShouldReturnTrue()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.CurrentIpAddress = new System.Net.IPAddress(43);
-        //    networkInterface.Name = "cellular line";
+        [Fact]
+        public void WhenGettingRoamingAndThrowsShouldCatchAndReturnFalse()
+        {
+            _mockConnectionCost.Setup(ni => ni.Roaming).Throws(new Exception());
 
-        //    var wifi = new NetworkInterface();
-        //    wifi.CurrentIpAddress = new System.Net.IPAddress(0);
-        //    wifi.Name = "wifi";
+            Assert.False(ConnectionInfo.Roaming);
+        }
 
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface, wifi };
+        [Fact]
+        public void WhenGettingWifiAndThrowsShouldCatchAndReturnFalse()
+        {
+            _mockWirelessNetworkInterface.Setup(ni => ni.OperationalStatus).Throws(new Exception());
 
-        //    Assert.True(this.ConnectionInfo.Mobile);
-        //}
-
-        //[Fact]
-        //public void WhenCallingMobileAndThrowsShouldReturnFalse()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.Name = "cellular line";
-
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
-
-        //    Assert.False(this.ConnectionInfo.Mobile);
-        //}
-
-        //[Fact]
-        //public void WhenCallingRoamingAndDeviceNoSupportingPhone()
-        //{
-        //    this.Registry.Setup(r => r.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0))
-        //        .Returns(0);
-
-        //    Assert.False(this.ConnectionInfo.Roaming);
-        //    this.Registry.Verify(r => r.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0), Times.Once());
-        //}
-
-        //[Fact]
-        //public void WhenCallingRoamingAndDeviceNotRoamingShouldReturnFalse()
-        //{
-        //    this.Registry.Setup(r => r.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0))
-        //        .Returns(0x32);
-
-        //    Assert.False(this.ConnectionInfo.Roaming);
-
-        //    this.Registry.Verify(r => r.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0), Times.Once());
-        //}
-
-        //[Fact]
-        //public void WhenCallingRoamingAndDeviceIsRoamingShouldReturnTrue()
-        //{
-        //    this.Registry.Setup(r => r.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0))
-        //        .Returns(0x32 | 0x200);
-
-        //    Assert.True(this.ConnectionInfo.Roaming);
-        //}
-
-        //[Fact]
-        //public void WhenCallingWifiAndWirelessZeroConfigNetworkInterfaceExistsShouldReturnTrue()
-        //{
-        //    var wirelessInterface = new WirelessZeroConfigNetworkInterface();
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { wirelessInterface };
-
-        //    Assert.True(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Fact]
-        //public void WhenCallingWifiAndWirelessNetworkInterfaceExistsShouldReturnTrue()
-        //{
-        //    var wirelessInterface = new WirelessNetworkInterface();
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { wirelessInterface };
-
-        //    Assert.True(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Theory]
-        //[InlineData(10000000)]
-        //[InlineData(100000000)]
-        //public void WhenCallingWifiAndLanNetworkInterfaceExistsShouldReturnFalse(int speed)
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.Speed = speed;
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
-
-        //    Assert.False(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Theory]
-        //[InlineData("USB Cable")]
-        //[InlineData("usb cable")]
-        //public void WhenCallingWifiAndActiveSyncNetworkInterfaceExistsShouldReturnFalse(string name)
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.Name = name;
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
-
-        //    Assert.False(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Theory]
-        //[InlineData("Cellular Line")]
-        //[InlineData("cellular line")]
-        //public void WhenCallingWifiAndGPRSNetworkInterfaceExistsShouldReturnFalse(string name)
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.Name = name;
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface };
-
-        //    Assert.False(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Fact]
-        //public void WhenCallingWifiAndMoreThanOneNetworkInterfaceExistsAndFirstOneIsUSBSkipItAndUseFirstWireless()
-        //{
-        //    var networkInterface = new NetworkInterface();
-        //    networkInterface.Name = "USB Cable";
-        //    var wirelessInterface = new WirelessNetworkInterface();
-
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { networkInterface, wirelessInterface };
-
-        //    Assert.True(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Fact]
-        //public void WhenCallingWifiAndMoreThanOneNetworkInterfaceExistsAndNoneIsWirelessNetworkInterface()
-        //{
-        //    var usbNetworkInterface = new NetworkInterface();
-        //    usbNetworkInterface.Name = "USB Cable";
-
-        //    var lanNetworkInterface = new NetworkInterface();
-        //    lanNetworkInterface.Speed = 10000000;
-
-        //    var wirelessInterface = new NetworkInterface();
-        //    wirelessInterface.Name = "WIRELESS";
-
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { usbNetworkInterface, lanNetworkInterface, wirelessInterface };
-
-        //    Assert.True(this.ConnectionInfo.Wifi);
-        //}
-
-        //[Fact]
-        //public void WhenCallingWifiAndNotUsingWifiShouldReturnFalse()
-        //{
-        //    var usbNetworkInterface = new NetworkInterface();
-        //    usbNetworkInterface.Name = "USB Cable";
-
-        //    var lanNetworkInterface = new NetworkInterface();
-        //    lanNetworkInterface.Speed = 10000000;
-
-        //    NetworkInterface.NetworkInterfaces = new INetworkInterface[] { usbNetworkInterface, lanNetworkInterface };
-        //    Assert.False(this.ConnectionInfo.Wifi);
-        //}
+            Assert.False(ConnectionInfo.Wifi);
+        }
     }
 }

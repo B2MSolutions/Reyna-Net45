@@ -28,7 +28,7 @@ namespace Reyna.Facts.Connection
 
             this.connectionInfo.SetupGet(c => c.Connected).Returns(true);
             this.preferences.SetupGet(p => p.OnChargeBlackout).Returns(false);
-            this.powerManager.Setup(p => p.IsBatteryCharging()).Returns(false);
+            this.powerManager.Setup(p => p.IsPowerLineConnected()).Returns(false);
             this.preferences.SetupGet(p => p.OffChargeBlackout).Returns(false);
             this.preferences.SetupGet(p => p.RoamingBlackout).Returns(false);
             this.blackoutTime.Setup(b => b.CanSendAtTime(It.IsAny<DateTime>(), It.IsAny<String>())).Returns(true);
@@ -69,7 +69,7 @@ namespace Reyna.Facts.Connection
         public void whenCallingCanSendAndIsOnChargeBlackoutAndBatterIsChargingShouldReturnBlackout()
         {
             this.preferences.SetupGet(p => p.OnChargeBlackout).Returns(true);
-            this.powerManager.Setup(p => p.IsBatteryCharging()).Returns(true);
+            this.powerManager.Setup(p => p.IsPowerLineConnected()).Returns(true);
 
             var result = this.connectionManager.CanSend;
 
@@ -80,7 +80,7 @@ namespace Reyna.Facts.Connection
         public void whenCallingCanSendAndIsOffChargeBlackoutAndNotChargingShouldReturnBlackout()
         {
             this.preferences.SetupGet(p => p.OffChargeBlackout).Returns(true);
-            this.powerManager.Setup(p => p.IsBatteryCharging()).Returns(false);
+            this.powerManager.Setup(p => p.IsPowerLineConnected()).Returns(false);
 
             var result = this.connectionManager.CanSend;
 

@@ -1,37 +1,21 @@
-﻿namespace Reyna.Power
+﻿using System.Windows.Forms;
+
+namespace Reyna.Power
 {
-    using Reyna.Interfaces;
+    using Interfaces;
 
     public class PowerManager : IPowerManager
     {
-        public const byte Online = 0x01;
+        private readonly IPowerStatusWrapper _powerStatusWrapper;
 
-        public SystemPowerStatus SystemPowerStatus
+        public PowerManager(IPowerStatusWrapper powerStatusWrapper)
         {
-            get
-            {
-                var systemPowerStatus = new SystemPowerStatus();
-                if (NativeMethods.GetSystemPowerStatusEx(systemPowerStatus, 0) == 1)
-                {
-                    return systemPowerStatus;
-                }
-
-                return null;
-            }
+            _powerStatusWrapper = powerStatusWrapper;
         }
 
-        public bool IsBatteryCharging()
+        public bool IsPowerLineConnected()
         {
-            var systemPowerStatus = this.SystemPowerStatus;
-            if (systemPowerStatus != null)
-            {
-                if (systemPowerStatus.ACLineStatus.Equals(PowerManager.Online))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return _powerStatusWrapper.PowerLineStatus.Equals(PowerLineStatus.Online);
         }
     }
 }

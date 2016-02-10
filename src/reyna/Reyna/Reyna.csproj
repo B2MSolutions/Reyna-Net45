@@ -10,6 +10,7 @@
     <RootNamespace>Reyna</RootNamespace>
     <AssemblyName>Reyna</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -67,19 +68,23 @@
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.98.1\lib\net45\System.Data.SQLite.Linq.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Windows.Networking" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blackout\BlackoutTime.cs" />
     <Compile Include="Blackout\IBlackoutTime.cs" />
     <Compile Include="Blackout\Time.cs" />
     <Compile Include="Blackout\TimeRange.cs" />
+    <Compile Include="Connection\ConnectionCost.cs" />
     <Compile Include="Connection\ConnectionInfo.cs" />
     <Compile Include="Connection\ConnectionManager.cs" />
+    <Compile Include="Connection\IConnectionCost.cs" />
     <Compile Include="Connection\IConnectionInfo.cs" />
     <Compile Include="Connection\IConnectionManager.cs" />
     <Compile Include="Extensions\HttpStatusCodeExtensions.cs" />
@@ -91,9 +96,15 @@
     <Compile Include="Logging\ILogDelegate.cs" />
     <Compile Include="NativeMethods\NativeMethods.cs" />
     <Compile Include="Network\INetwork.cs" />
+    <Compile Include="Network\INetworkInterfaceWrapper.cs" />
+    <Compile Include="Network\INetworkInterfaceWrapperFactory.cs" />
     <Compile Include="Network\Network.cs" />
+    <Compile Include="Network\NetworkInterfaceWrapper.cs" />
+    <Compile Include="Network\NetworkInterfaceWrapperFactory.cs" />
     <Compile Include="Power\IPowerManager.cs" />
+    <Compile Include="Power\IPowerStatusWrapper.cs" />
     <Compile Include="Power\PowerManager.cs" />
+    <Compile Include="Power\PowerStatusWrapper.cs" />
     <Compile Include="Power\SystemPowerStatus.cs" />
     <Compile Include="Preferences\IPreferences.cs" />
     <Compile Include="Preferences\IRegistry.cs" />

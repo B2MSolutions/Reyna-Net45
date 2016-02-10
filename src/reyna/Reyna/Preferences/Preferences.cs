@@ -2,10 +2,11 @@
 {
     using System;
     using System.Text.RegularExpressions;
-    using Microsoft.Win32;
 
     public class Preferences : IPreferences
     {
+        private readonly IRegistry _registry;
+
         private const string SubKey = @"Software\Reyna";
         private const string StorageSizeLimitKeyName = "StorageSizeLimit";
         private const string WlanBlackoutRangeKeyName = "WlanBlackoutRange";
@@ -17,6 +18,11 @@
         private const string DataBlackoutToKeyName = "DataBlackout:To";
         private const string TemporaryErrorBackout = "TemporaryErrorBackout";
         private const string MessageBackout = "MessageBackout";
+
+        public Preferences(IRegistry registry)
+        {
+            _registry = registry;
+        }
 
         public TimeRange CellularDataBlackout
         {
@@ -205,8 +211,7 @@
 
         public void SaveCellularDataAsWwanForBackwardsCompatibility()
         {
-            Preferences preferences = new Preferences();
-            TimeRange timeRange = preferences.CellularDataBlackout;
+            TimeRange timeRange = CellularDataBlackout;
             if (timeRange != null)
             {
                 int hourFrom = (int)Math.Floor((double)timeRange.From.MinuteOfDay / 60);
@@ -217,7 +222,7 @@
                 int minuteTo = timeRange.To.MinuteOfDay % 60;
                 string blackoutTo = ZeroPad(hourTo) + ":" + ZeroPad(minuteTo);
 
-                preferences.SetWwanBlackoutRange(blackoutFrom + "-" + blackoutTo);
+                SetWwanBlackoutRange(blackoutFrom + "-" + blackoutTo);
             }
         }
 
@@ -231,49 +236,49 @@
             DeleteRegistryValue(StorageSizeLimitKeyName);
         }
 
-        private static long GetRegistryValue(string keyName, long defaultValue)
+        private long GetRegistryValue(string keyName, long defaultValue)
         {
-            return new Registry().GetQWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
+            return _registry.GetQWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
         }
 
-        private static int GetRegistryValue(string keyName, int defaultValue)
+        private int GetRegistryValue(string keyName, int defaultValue)
         {
-            return new Registry().GetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
+            return _registry.GetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
         }
 
-        private static bool GetRegistryValue(string keyName, bool defaultValue)
+        private bool GetRegistryValue(string keyName, bool defaultValue)
         {
-            return new Registry().GetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue ? 1 : 0) == 1;
+            return _registry.GetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue ? 1 : 0) == 1;
         }
 
-        private static string GetRegistryValue(string keyName, string defaultValue)
+        private string GetRegistryValue(string keyName, string defaultValue)
         {
-            return new Registry().GetString(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
+            return _registry.GetString(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, defaultValue);
         }
 
-        private static void SetRegistryValue(string keyName, long value)
+        private void SetRegistryValue(string keyName, long value)
         {
-            new Registry().SetQWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
+            _registry.SetQWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
         }
 
-        private static void SetRegistryValue(string keyName, string value)
+        private void SetRegistryValue(string keyName, string value)
         {
-            new Registry().SetString(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
+            _registry.SetString(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
         }
 
-        private static void SetRegistryValue(string keyName, bool value)
+        private void SetRegistryValue(string keyName, bool value)
         {
-            new Registry().SetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value ? 1 : 0);
+            _registry.SetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value ? 1 : 0);
         }
 
-        private static void SetRegistryValue(string keyName, int value)
+        private void SetRegistryValue(string keyName, int value)
         {
-            new Registry().SetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
+            _registry.SetDWord(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName, value);
         }
 
-        private static void DeleteRegistryValue(string keyName)
+        private void DeleteRegistryValue(string keyName)
         {
-            new Registry().DeleteValue(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName);
+            _registry.DeleteValue(Microsoft.Win32.Registry.LocalMachine, SubKey, keyName);
         }
 
         private static object ZeroPad(int numToPad)

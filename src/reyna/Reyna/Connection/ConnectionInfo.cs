@@ -1,35 +1,39 @@
 ﻿namespace Reyna
 {
     using System;
-    using System.IO;
-    using Microsoft.Win32;
     using System.Net.NetworkInformation;
 
     public class ConnectionInfo : IConnectionInfo
     {
-        public ConnectionInfo()
+        private readonly IConnectionCost _connectionCost;
+        private readonly INetworkInterfaceWrapperFactory _networkInterfaceWrapper;
+
+        public ConnectionInfo(IConnectionCost connectionCost, INetworkInterfaceWrapperFactory networkInterfaceWrapperFactory)
         {
-            this.Registry = new Registry();
+            _connectionCost = connectionCost;
+            _networkInterfaceWrapper = networkInterfaceWrapperFactory;
         }
-        
+
         public bool Connected
         {
             get
             {
                 try
                 {
-                    foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+                    foreach (var ni in _networkInterfaceWrapper.GetAllNetworkInterfaces())
                     {
-                        if (ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                        if (ni.OperationalStatus == OperationalStatus.Up &&
+                            ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                            ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
                         {
                             return true;
                         }
                     }
                 }
                 catch (Exception)
-                { 
+                {
                 }
-                
+
                 return false;
             }
         }
@@ -40,7 +44,7 @@
             {
                 try
                 {
-                    var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                    var interfaces = _networkInterfaceWrapper.GetAllNetworkInterfaces();
                     bool mobileNetworkConnected = false;
                     bool otherNetworksConnected = false;
                     foreach (var ni in interfaces)
@@ -52,7 +56,9 @@
                                 mobileNetworkConnected = true;
                             }
                         }
-                        else if (ni.NetworkInterfaceType != NetworkInterfaceType.Loopback && ni.OperationalStatus == OperationalStatus.Up)
+                        else if (ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                                 ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                                 ni.OperationalStatus == OperationalStatus.Up)
                         {
                             otherNetworksConnected = true;
                         }
@@ -73,7 +79,7 @@
             {
                 try
                 {
-                    var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                    var interfaces = _networkInterfaceWrapper.GetAllNetworkInterfaces();
                     foreach (var ni in interfaces)
                     {
                         if (WifiNetwork(ni))
@@ -98,21 +104,25 @@
         {
             get
             {
-                var phoneRoamingBitMask = 0x200;
-                var status = this.Registry.GetDWord(Microsoft.Win32.Registry.LocalMachine, "System\\State\\Phone", "Status", 0);
-                return (status & phoneRoamingBitMask) == phoneRoamingBitMask;
+                try
+                {
+                    return _connectionCost.Roaming;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
-
-        internal IRegistry Registry { get; set; }
-
  
-        private bool GPRSNetwork(NetworkInterface ni)
+        private bool GPRSNetwork(INetworkInterfaceWrapper ni)
         {
-            return ni.NetworkInterfaceType == NetworkInterfaceType.Wwanpp;
+            return ni.NetworkInterfaceType.Equals(NetworkInterfaceType.Wman) ||
+                   ni.NetworkInterfaceType.Equals(NetworkInterfaceType.Wwanpp) ||
+                   ni.NetworkInterfaceType.Equals(NetworkInterfaceType.Wwanpp2);
         }
 
-        private bool WifiNetwork(NetworkInterface ni)
+        private bool WifiNetwork(INetworkInterfaceWrapper ni)
         {
             return ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
         }

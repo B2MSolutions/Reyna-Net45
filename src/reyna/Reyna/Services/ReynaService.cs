@@ -19,36 +19,32 @@ namespace Reyna
         internal IReynaLogger Logger { get; set; }
         
         internal byte[] Password { get; set; }
-
-        public ReynaService() : this(null)
-        {
-        }
-
-        public ReynaService(byte[] password) : this(password, UnityHelper.GetContainer())
+        
+        public ReynaService(byte[] password = null) : this(password, UnityHelper.GetContainer())
         {
         }
 
         internal ReynaService(byte[] password, IUnityContainer container)
         {
-            this.HttpClient = container.Resolve<IHttpClient>();
-            this.Preferences = container.Resolve<IPreferences>();
-            this.VolatileStore = container.Resolve<IRepository>(Constants.Injection.VOLATILE_STORE);
-            this.PersistentStore = container.Resolve<IRepository>(Constants.Injection.SQLITE_STORE);
-            this.NetworkStateService = container.Resolve<INetworkStateService>();
-            this.StoreService = container.Resolve<IStoreService>();
-            this.ForwardService = container.Resolve<IForwardService>();
-            this.EncryptionChecker = container.Resolve<IEncryptionChecker>();
+            HttpClient = container.Resolve<IHttpClient>();
+            Preferences = container.Resolve<IPreferences>();
+            VolatileStore = container.Resolve<IRepository>(Constants.Injection.VOLATILE_STORE);
+            PersistentStore = container.Resolve<IRepository>(Constants.Injection.SQLITE_STORE);
+            NetworkStateService = container.Resolve<INetworkStateService>();
+            StoreService = container.Resolve<IStoreService>();
+            ForwardService = container.Resolve<IForwardService>();
+            EncryptionChecker = container.Resolve<IEncryptionChecker>();
 
-            this.Logger = container.Resolve<IReynaLogger>();
+            Logger = container.Resolve<IReynaLogger>();
 
-            this.StoreService.Initialize(this.VolatileStore, this.PersistentStore);
-            this.ForwardService.Initialize(this.PersistentStore, this.HttpClient, this.NetworkStateService, this.Preferences.ForwardServiceTemporaryErrorBackout, this.Preferences.ForwardServiceMessageBackout);
+            StoreService.Initialize(VolatileStore, PersistentStore);
+            ForwardService.Initialize(PersistentStore, HttpClient, NetworkStateService, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout);
                                             
-            this.Password = password;
+            Password = password;
 
             if (password != null)
             {
-                this.PersistentStore.Password = password;
+                PersistentStore.Password = password;
             }
         }
 
@@ -56,74 +52,74 @@ namespace Reyna
         {
             get
             {
-                return this.Preferences.StorageSizeLimit;
+                return Preferences.StorageSizeLimit;
             }
         }
 
         public void SetStorageSizeLimit(long limit)
         {
             limit = limit < MinimumStorageLimit ? MinimumStorageLimit : limit;
-            this.Preferences.SetStorageSizeLimit(limit);
+            Preferences.SetStorageSizeLimit(limit);
 
-            this.PersistentStore.Initialise();
-            this.PersistentStore.ShrinkDb(limit);
+            PersistentStore.Initialise();
+            PersistentStore.ShrinkDb(limit);
         }
 
         public void ResetStorageSizeLimit()
         {
-            this.Preferences.ResetStorageSizeLimit();
+            Preferences.ResetStorageSizeLimit();
         }
 
         public void SetCellularDataBlackout(TimeRange timeRange)
         {
-            this.Preferences.SetCellularDataBlackout(timeRange);
+            Preferences.SetCellularDataBlackout(timeRange);
         }
 
         public void ResetCellularDataBlackout()
         {
-            this.Preferences.ResetCellularDataBlackout();
+            Preferences.ResetCellularDataBlackout();
         }
 
         public void SetWlanBlackoutRange(string range)
         {
-            this.Preferences.SetWlanBlackoutRange(range);
+            Preferences.SetWlanBlackoutRange(range);
         }
 
         public void SetWwanBlackoutRange(string range)
         {
-            this.Preferences.SetWwanBlackoutRange(range);
+            Preferences.SetWwanBlackoutRange(range);
         }
 
         public void SetRoamingBlackout(bool value)
         {
-            this.Preferences.SetRoamingBlackout(value);
+            Preferences.SetRoamingBlackout(value);
         }
 
         public void SetOnChargeBlackout(bool value)
         {
-            this.Preferences.SetOnChargeBlackout(value);
+            Preferences.SetOnChargeBlackout(value);
         }
 
         public void SetOffChargeBlackout(bool value)
         {
-            this.Preferences.SetOffChargeBlackout(value);
+            Preferences.SetOffChargeBlackout(value);
         }
 
         public void Start()
         {
             Logger.Info("Reyna.ReynaService Start enter");  
           
-            if (this.Password != null && this.Password.Length > 0)
+            if (Password != null && Password.Length > 0)
             {
-                if (!this.EncryptionChecker.DbEncrypted())
+                if (!EncryptionChecker.DbEncrypted())
                 {
-                    this.EncryptionChecker.EncryptDb(this.Password);
+                    EncryptionChecker.EncryptDb(Password);
                 }
             }
 
-            this.StoreService.Start();
-            this.ForwardService.Start();
-            this.NetworkStateService.Start();
+            StoreService.Start();
+            ForwardService.Start();
+            NetworkStateService.Start();
 
             Logger.Info("Reyna.ReynaService Start exit");   
         }
@@ -132,16 +128,16 @@ namespace Reyna
         {
             Logger.Info("Reyna.ReynaService Stop enter");  
 
-            this.NetworkStateService.Stop();
-            this.ForwardService.Stop();
-            this.StoreService.Stop();
+            NetworkStateService.Stop();
+            ForwardService.Stop();
+            StoreService.Stop();
             
             Logger.Info("Reyna.ReynaService Stop exit");  
         }
 
         public void Put(IMessage message)
         {
-            this.VolatileStore.Add(message);
+            VolatileStore.Add(message);
         }
 
         public void EnableLogging(ILogDelegate logDelegate)
@@ -152,19 +148,19 @@ namespace Reyna
 
         public void Dispose()
         {
-            if (this.NetworkStateService != null)
+            if (NetworkStateService != null)
             {
-                this.NetworkStateService.Dispose();
+                NetworkStateService.Dispose();
             }
 
-            if (this.ForwardService != null)
+            if (ForwardService != null)
             {
-                this.ForwardService.Dispose();
+                ForwardService.Dispose();
             }
 
-            if (this.StoreService != null)
+            if (StoreService != null)
             {
-                this.StoreService.Dispose();
+                StoreService.Dispose();
             }
         }
     }
