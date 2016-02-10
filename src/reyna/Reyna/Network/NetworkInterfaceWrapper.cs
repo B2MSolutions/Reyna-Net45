@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Net.NetworkInformation;
+﻿using System.Net.NetworkInformation;
 
 namespace Reyna
 {
@@ -10,13 +9,6 @@ namespace Reyna
         public NetworkInterfaceWrapper(NetworkInterface networkInterface = null)
         {
             _networkInterface = networkInterface;
-        }
-
-        public INetworkInterfaceWrapper[] GetAllNetworkInterfaces()
-        {
-            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-            return interfaces.Select(networkInterface => new NetworkInterfaceWrapper(networkInterface)).Cast<INetworkInterfaceWrapper>().ToArray();
         }
 
         public NetworkInterfaceType NetworkInterfaceType

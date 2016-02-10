@@ -6,12 +6,12 @@
     public class ConnectionInfo : IConnectionInfo
     {
         private readonly IConnectionCost _connectionCost;
-        private readonly INetworkInterfaceWrapper _networkInterfaceWrapper;
+        private readonly INetworkInterfaceWrapperFactory _networkInterfaceWrapper;
 
-        public ConnectionInfo(IConnectionCost connectionCost = null, INetworkInterfaceWrapper networkInterfaceWrapper = null)
+        public ConnectionInfo(IConnectionCost connectionCost, INetworkInterfaceWrapperFactory networkInterfaceWrapperFactory)
         {
-            _connectionCost = connectionCost ?? new ConnectionCost();
-            _networkInterfaceWrapper = networkInterfaceWrapper ?? new NetworkInterfaceWrapper();
+            _connectionCost = connectionCost;
+            _networkInterfaceWrapper = networkInterfaceWrapperFactory;
         }
 
         public bool Connected

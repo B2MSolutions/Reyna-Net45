@@ -10,7 +10,7 @@ namespace Reyna.Facts
         public GivenAConnectionInfo()
         {
             _mockConnectionCost = new Mock<IConnectionCost>();
-            _mockNetworkInterface = new Mock<INetworkInterfaceWrapper>();
+            _mockNetworkInterface = new Mock<INetworkInterfaceWrapperFactory>();
 
             _mockMobileNetworkInterface = new Mock<INetworkInterfaceWrapper>();
             _mockMobileNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(NetworkInterfaceType.Wwanpp);
@@ -26,7 +26,7 @@ namespace Reyna.Facts
         }
 
         private readonly Mock<IConnectionCost> _mockConnectionCost;
-        private readonly Mock<INetworkInterfaceWrapper> _mockNetworkInterface;
+        private readonly Mock<INetworkInterfaceWrapperFactory> _mockNetworkInterface;
         private readonly Mock<INetworkInterfaceWrapper> _mockWirelessNetworkInterface;
         private readonly Mock<INetworkInterfaceWrapper> _mockMobileNetworkInterface;
 

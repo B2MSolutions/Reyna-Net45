@@ -1,15 +1,9 @@
-﻿
+﻿using Microsoft.Practices.Unity;
+using Reyna.Interfaces;
+using Reyna.Power;
+
 namespace Reyna
 {
-    using Microsoft.Practices.Unity;
-    using Reyna.Interfaces;
-    using Reyna.Power;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    
     internal static class UnityHelper
     {
         internal static IUnityContainer GetContainer()
@@ -32,6 +26,8 @@ namespace Reyna
             container.RegisterType<IConnectionInfo, ConnectionInfo>();
             container.RegisterType<IBlackoutTime, BlackoutTime>();
             container.RegisterType<IWebRequest, ReynaWebRequest>();
+            container.RegisterType<INetworkInterfaceWrapper, NetworkInterfaceWrapper>();
+            container.RegisterType<INetworkInterfaceWrapperFactory, NetworkInterfaceWrapperFactory>();
 
             container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 
