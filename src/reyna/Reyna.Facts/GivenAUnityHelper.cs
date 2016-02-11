@@ -1,17 +1,11 @@
-﻿
+﻿using Microsoft.Practices.Unity;
+using Reyna.Interfaces;
+using Reyna.Power;
+using System.Linq;
+using Xunit;
+
 namespace Reyna.Facts
 {
-    using Microsoft.Practices.Unity;
-    using Reyna.Interfaces;
-    using Reyna.Power;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Xunit;
-    using Reyna;
-
     public class GivenAUnityHelper
     {
         [Fact]
@@ -46,7 +40,7 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPowerStatusWrapper) && r.MappedToType == typeof(PowerStatusWrapper)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapper) && r.MappedToType == typeof(NetworkInterfaceWrapper)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapperFactory) && r.MappedToType == typeof(NetworkInterfaceWrapperFactory)));
-            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IConnectionCost) && r.MappedToType == typeof(ConnectionCost)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMbnInterfaceManagerWrapper) && r.MappedToType == typeof(MbnInterfaceManagerWrapper)));
 
             Assert.Equal(23, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
