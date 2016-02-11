@@ -42,7 +42,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="MbnApi">
-      <HintPath>..\..\..\tools\api\mbn\x86\MbnApi.dll</HintPath>
+      <HintPath>..\..\..\bin\MbnApi.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">

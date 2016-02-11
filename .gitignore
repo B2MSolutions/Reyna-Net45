@@ -1,5 +1,5 @@
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
-[Bb]in/
+# [Bb]in/
 [Oo]bj/
 
 # mstest test results
@@ -19,7 +19,6 @@ TestResults
 [Rr]elease/
 [Cc]overage
 [Oo]utput
-ElemezNativeSupport.dll
 x64/
 *_i.c
 *_p.c
@@ -93,11 +92,10 @@ csx
 AppPackages/
 
 # Others
-[Bb]in
+# [Bb]in
 [Oo]bj
 sql
 TestResults
-/ElemezTestAcceptance
 [Tt]est[Rr]esult*
 *.Cache
 ClientBin
@@ -115,12 +113,12 @@ UpgradeLog*.XML
 #
 *.exe
 !nuget.exe
-*.dll
+# *.dll
 !log4net.dll
 *.suo
 *.user
 _ReSharper.*
-bin
+# bin
 obj
 packages
 *.msi
