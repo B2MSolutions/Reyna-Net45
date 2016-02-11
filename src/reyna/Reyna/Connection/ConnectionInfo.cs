@@ -1,17 +1,19 @@
-﻿namespace Reyna
+﻿using MbnApi;
+
+namespace Reyna
 {
     using System;
     using System.Net.NetworkInformation;
 
     public class ConnectionInfo : IConnectionInfo
     {
-        private readonly IConnectionCost _connectionCost;
         private readonly INetworkInterfaceWrapperFactory _networkInterfaceWrapper;
+        private readonly IMbnInterfaceManagerWrapper _mbnInterface;
 
-        public ConnectionInfo(IConnectionCost connectionCost, INetworkInterfaceWrapperFactory networkInterfaceWrapperFactory)
+        public ConnectionInfo(INetworkInterfaceWrapperFactory networkInterfaceWrapperFactory, IMbnInterfaceManagerWrapper mbnInterface)
         {
-            _connectionCost = connectionCost;
             _networkInterfaceWrapper = networkInterfaceWrapperFactory;
+            _mbnInterface = mbnInterface;
         }
 
         public bool Connected
@@ -32,6 +34,7 @@
                 }
                 catch (Exception)
                 {
+                    // ignored
                 }
 
                 return false;
@@ -106,7 +109,17 @@
             {
                 try
                 {
-                    return _connectionCost.Roaming;
+                    IMbnInterface[] mobileInterfaces = _mbnInterface.MobileInterfaces;
+                    foreach (IMbnInterface mobileInterface in mobileInterfaces)
+                    {
+                        var registration = mobileInterface as IMbnRegistration;
+
+                        if (registration != null)
+                            return registration.GetRegisterState() == MBN_REGISTER_STATE.MBN_REGISTER_STATE_PARTNER ||
+                                   registration.GetRegisterState() == MBN_REGISTER_STATE.MBN_REGISTER_STATE_ROAMING;
+                    }
+
+                    return false;
                 }
                 catch (Exception)
                 {

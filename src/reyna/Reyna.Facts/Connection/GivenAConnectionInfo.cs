@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.NetworkInformation;
+using MbnApi;
 using Moq;
 using Xunit;
 
@@ -9,8 +10,7 @@ namespace Reyna.Facts
     {
         public GivenAConnectionInfo()
         {
-            _mockConnectionCost = new Mock<IConnectionCost>();
-            _mockNetworkInterface = new Mock<INetworkInterfaceWrapperFactory>();
+            _mockNetworkInterfaceFactory = new Mock<INetworkInterfaceWrapperFactory>();
 
             _mockMobileNetworkInterface = new Mock<INetworkInterfaceWrapper>();
             _mockMobileNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(NetworkInterfaceType.Wwanpp);
@@ -20,15 +20,22 @@ namespace Reyna.Facts
             _mockWirelessNetworkInterface.Setup(ni => ni.NetworkInterfaceType).Returns(NetworkInterfaceType.Wireless80211);
             _mockWirelessNetworkInterface.Setup(ni => ni.OperationalStatus).Returns(OperationalStatus.Down);
 
-            _mockNetworkInterface.Setup(nc => nc.GetAllNetworkInterfaces()).Returns(new[] { _mockWirelessNetworkInterface.Object, _mockMobileNetworkInterface.Object });
+            _mockNetworkInterfaceFactory.Setup(nc => nc.GetAllNetworkInterfaces()).Returns(new[] { _mockWirelessNetworkInterface.Object, _mockMobileNetworkInterface.Object });
 
-            ConnectionInfo = new ConnectionInfo(_mockConnectionCost.Object, _mockNetworkInterface.Object);
+            _mockMbnRegistration = new Mock<IMbnRegistration>();
+            var mockMbnInterface = _mockMbnRegistration.As<IMbnInterface>();
+
+            _mockMbnInterfaceManager = new Mock<IMbnInterfaceManagerWrapper>();
+            _mockMbnInterfaceManager.Setup(m => m.MobileInterfaces).Returns(new []{ mockMbnInterface.Object });
+
+            ConnectionInfo = new ConnectionInfo(_mockNetworkInterfaceFactory.Object, _mockMbnInterfaceManager.Object);
         }
-
-        private readonly Mock<IConnectionCost> _mockConnectionCost;
-        private readonly Mock<INetworkInterfaceWrapperFactory> _mockNetworkInterface;
+        
+        private readonly Mock<INetworkInterfaceWrapperFactory> _mockNetworkInterfaceFactory;
         private readonly Mock<INetworkInterfaceWrapper> _mockWirelessNetworkInterface;
         private readonly Mock<INetworkInterfaceWrapper> _mockMobileNetworkInterface;
+        private readonly Mock<IMbnInterfaceManagerWrapper> _mockMbnInterfaceManager;
+        private readonly Mock<IMbnRegistration> _mockMbnRegistration;
 
         private ConnectionInfo ConnectionInfo { get; set; }
 
@@ -63,7 +70,10 @@ namespace Reyna.Facts
         [InlineData(false)]
         public void WhenGettingRoamingShouldReturnExpected(bool expected)
         {
-            _mockConnectionCost.Setup(ni => ni.Roaming).Returns(expected);
+            _mockMbnRegistration.Setup(mi => mi.GetRegisterState())
+                .Returns(expected
+                    ? MBN_REGISTER_STATE.MBN_REGISTER_STATE_ROAMING
+                    : MBN_REGISTER_STATE.MBN_REGISTER_STATE_NONE);
 
             Assert.Equal(expected, ConnectionInfo.Roaming);
         }
@@ -109,7 +119,7 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGettingRoamingAndThrowsShouldCatchAndReturnFalse()
         {
-            _mockConnectionCost.Setup(ni => ni.Roaming).Throws(new Exception());
+            _mockMbnRegistration.Setup(mi => mi.GetRegisterState()).Throws(new Exception());
 
             Assert.False(ConnectionInfo.Roaming);
         }

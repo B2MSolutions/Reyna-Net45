@@ -28,7 +28,7 @@ namespace Reyna
             container.RegisterType<IWebRequest, ReynaWebRequest>();
             container.RegisterType<INetworkInterfaceWrapper, NetworkInterfaceWrapper>();
             container.RegisterType<INetworkInterfaceWrapperFactory, NetworkInterfaceWrapperFactory>();
-            container.RegisterType<IConnectionCost, ConnectionCost>();
+            container.RegisterType<IMbnInterfaceManagerWrapper, MbnInterfaceManagerWrapper>();
             container.RegisterType<IPowerStatusWrapper, PowerStatusWrapper>();
             container.RegisterType<IRegistry, Registry>();
 
