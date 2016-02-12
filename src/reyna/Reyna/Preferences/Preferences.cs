@@ -18,6 +18,9 @@
         private const string DataBlackoutToKeyName = "DataBlackout:To";
         private const string TemporaryErrorBackout = "TemporaryErrorBackout";
         private const string MessageBackout = "MessageBackout";
+        private const string BatchUploadKeyName = "BatchUpload";
+        private const string BatchUploadUriKeyName = "BatchUploadUri";
+        private const string BatchUploadIntervalKeyName = "BatchUploadInterval";
 
         public Preferences(IRegistry registry)
         {
@@ -226,6 +229,21 @@
             }
         }
 
+        public void SaveBatchUpload(bool value)
+        {
+            SetRegistryValue(BatchUploadKeyName, value);
+        }
+
+        public void SaveBatchUploadUrl(Uri url)
+        {
+            SetRegistryValue(BatchUploadUriKeyName, url.ToString());
+        }
+
+        public void SaveBatchUploadCheckInterval(long checkInterval)
+        {
+            SetRegistryValue(BatchUploadIntervalKeyName, checkInterval);
+        }
+        
         public void SetStorageSizeLimit(long limit)
         {
             SetRegistryValue(StorageSizeLimitKeyName, limit);
@@ -284,6 +302,37 @@
         private static object ZeroPad(int numToPad)
         {
             return numToPad.ToString("D2");
+        }
+
+        public bool BatchUpload
+        {
+            get
+            {
+                return GetRegistryValue(BatchUploadKeyName, true);
+            }
+        }
+
+        public Uri BatchUploadUrl
+        {
+            get
+            {
+                var url = GetRegistryValue(BatchUploadUriKeyName, string.Empty);
+                if (string.IsNullOrEmpty(url))
+                {
+                    return null;
+                }
+
+                return new Uri(url);
+            }
+        }
+
+        public long BatchUploadCheckInterval
+        {
+            get
+            {
+                long sixHours = 6 * 60 * 60 * 1000;
+                return GetRegistryValue(BatchUploadIntervalKeyName, sixHours);
+            }
         }
     }
 }

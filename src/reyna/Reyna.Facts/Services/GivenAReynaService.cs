@@ -10,7 +10,7 @@
     using System.Net;
     using System.Text;
     using System.Linq;
-
+    using System;
     public class GivenAReynaService
     {
         private TestUnityHelper unity = new TestUnityHelper();
@@ -294,6 +294,16 @@
             ReynaService service = new ReynaService(null, container);
 
             helper.mockSqlStore.VerifySet(s => s.Password = It.IsAny<byte[]>(), Times.Never);
+        }
+
+        [Fact]
+        public void WhenCallingSetBatchUploadConfigurationShouldSetPreferences()
+        {
+            Uri uri = new Uri("http://test.com");
+            service.SetBatchUploadConfiguration(true, uri, 123456);
+            preferences.Verify(p => p.SaveBatchUpload(true));
+            preferences.Verify(p => p.SaveBatchUploadCheckInterval(123456));
+            preferences.Verify(p => p.SaveBatchUploadUrl(uri));
         }
     }
 }
