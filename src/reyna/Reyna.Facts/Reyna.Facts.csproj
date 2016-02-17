@@ -105,6 +105,11 @@
     <Compile Include="GivenAUnityHelper.cs" />
     <Compile Include="Http\GivenAnHttpClient.cs" />
     <Compile Include="Http\GivenAnHttpStatusCode.cs" />
+    <Compile Include="MessageProvider\GivenABatch.cs" />
+    <Compile Include="MessageProvider\GivenABatchConfiguration.cs" />
+    <Compile Include="MessageProvider\GivenABatchMessage.cs" />
+    <Compile Include="MessageProvider\GivenABatchProvider.cs" />
+    <Compile Include="MessageProvider\GivenAMessageProvider.cs" />
     <Compile Include="Power\GivenAPowerManager.cs" />
     <Compile Include="Preferences\GivenAPreferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -114,6 +119,7 @@
     <Compile Include="Services\GivenAStoreService.cs" />
     <Compile Include="Store\GivenAMessage.cs" />
     <Compile Include="Store\GivenAnInMemoryQueue.cs" />
+    <Compile Include="System\GivenARegistryPeriodicBackoutCheck.cs" />
     <Compile Include="TestUnityHelper.cs" />
     <Compile Include="Threading\GivenANamedWaitHandle.cs" />
   </ItemGroup>

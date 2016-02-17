@@ -31,6 +31,10 @@ namespace Reyna
             container.RegisterType<IMbnInterfaceManagerWrapper, MbnInterfaceManagerWrapper>();
             container.RegisterType<IPowerStatusWrapper, PowerStatusWrapper>();
             container.RegisterType<IRegistry, Registry>();
+            container.RegisterType<IBatchConfiguration, BatchConfiguration>();
+            container.RegisterType<IPeriodicBackoutCheck, RegistryPeriodicBackoutCheck>();
+            container.RegisterType<IMessageProvider, BatchProvider>(Constants.Injection.BATCH_PROVIDER);
+            container.RegisterType<IMessageProvider, MessageProvider>(Constants.Injection.MESSAGE_PROVIDER);
 
             container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 

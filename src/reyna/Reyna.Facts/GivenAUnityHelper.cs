@@ -41,8 +41,12 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapper) && r.MappedToType == typeof(NetworkInterfaceWrapper)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(INetworkInterfaceWrapperFactory) && r.MappedToType == typeof(NetworkInterfaceWrapperFactory)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMbnInterfaceManagerWrapper) && r.MappedToType == typeof(MbnInterfaceManagerWrapper)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IBatchConfiguration) && r.MappedToType == typeof(BatchConfiguration)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPeriodicBackoutCheck) && r.MappedToType == typeof(RegistryPeriodicBackoutCheck)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMessageProvider) && r.MappedToType == typeof(BatchProvider)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMessageProvider) && r.MappedToType == typeof(MessageProvider)));
 
-            Assert.Equal(23, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.Equal(27, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

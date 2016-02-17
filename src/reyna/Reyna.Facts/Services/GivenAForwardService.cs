@@ -38,6 +38,20 @@
             Assert.Equal(_networkStateService.Object, _service.NetworkState);
             Assert.Equal(5000, _service.SleepMilliseconds);
             Assert.Equal(10000, _service.TemporaryErrorMilliseconds);
+            Assert.IsType<MessageProvider>(_service.MessageProvider);
+        }
+
+        [Fact]
+        public void WhenCallingInitialiseShouldInitialiseClassCorrectlyWhenUsingBatchUploading()
+        {
+            _service.Initialize(_persistentStore.Object, _httpClient.Object, _networkStateService.Object, 10000, 5000, true);
+
+            Assert.Equal(_persistentStore.Object, _service.SourceStore);
+            Assert.Equal(_httpClient.Object, _service.HttpClient);
+            Assert.Equal(_networkStateService.Object, _service.NetworkState);
+            Assert.Equal(5000, _service.SleepMilliseconds);
+            Assert.Equal(10000, _service.TemporaryErrorMilliseconds);
+            Assert.IsType<BatchProvider>(_service.MessageProvider);
         }
 
         [Fact]
