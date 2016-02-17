@@ -4,6 +4,13 @@
 
     internal class BatchConfiguration : IBatchConfiguration
     {
+        private readonly IPreferences _preferences;
+
+        public BatchConfiguration(IPreferences preferences)
+        {
+            _preferences = preferences;
+        }
+
         public int BatchMessageCount
         {
             get
@@ -24,7 +31,7 @@
         {
             get
             {
-                return new Preferences().BatchUploadCheckInterval;
+                return _preferences.BatchUploadCheckInterval;
             }
         }
 
@@ -40,7 +47,7 @@
         {
             get
             {
-                return new Preferences().BatchUploadUrl;
+                return _preferences.BatchUploadUrl;
             }
         }
     }

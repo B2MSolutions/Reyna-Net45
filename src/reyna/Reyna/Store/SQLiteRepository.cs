@@ -1,14 +1,11 @@
-﻿
-namespace Reyna
+﻿namespace Reyna
 {
     using System;
     using System.Data.Common;
     using System.Data.SQLite;
     using System.IO;
-    using System.Net;
     using System.Reflection;
-    using System.Text;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     internal sealed class SQLiteRepository : IRepository
     {
@@ -17,6 +14,7 @@ namespace Reyna
         private const string InsertHeaderSql = "INSERT INTO Header(messageid, key, value) VALUES(@messageId, @key, @value);";
         private const string DeleteMessageSql = "DELETE FROM Header WHERE messageid = @messageId;DELETE FROM Message WHERE id = @messageId";
         private const string SelectTop1MessageSql = "SELECT id, url, body FROM Message ORDER BY id ASC LIMIT 1";
+        private const string SelectTop1MessageSqlFrom = "SELECT id, url, body FROM Message WHERE id > @messageId ORDER BY id ASC LIMIT 1";
         private const string SelectHeaderSql = "SELECT key, value FROM Header WHERE messageid = @messageId";
         private const string SelectMinIdWithTypeSql = "SELECT min(id) FROM Message WHERE url = @type";
         private const string SelectNumberOfMessagesSql = "SELECT count(*) from Message";
@@ -28,13 +26,13 @@ namespace Reyna
 
         public SQLiteRepository()
         {
-            this.SizeDifferenceToStartCleaning = 307200; ////300Kb in bytes
+            SizeDifferenceToStartCleaning = 307200; ////300Kb in bytes
         }
 
         public SQLiteRepository(byte[] password)
         {
-            this.Password = password;
-            this.SizeDifferenceToStartCleaning = 307200; ////300Kb in bytes
+            Password = password;
+            SizeDifferenceToStartCleaning = 307200; ////300Kb in bytes
         }
 
         private delegate IMessage ExecuteFunctionInTransaction(DbTransaction transaction);
@@ -43,14 +41,55 @@ namespace Reyna
 
         public event EventHandler<EventArgs> MessageAdded;
 
+        public long AvailableMessagesCount {
+            get
+            {
+                long count = 0;
+                Execute(connection =>
+                {
+                    count = GetNumberOfMessages(connection);
+                });
+
+                return count;
+            }
+        }
+
+        public IMessage GetNextMessageAfter(long messageId)
+        {
+            return ExecuteInTransaction(t =>
+            {
+                IMessage message;
+                var messageIdParameter = CreateParameter("@messageId", messageId);
+                using (var reader = ExecuteReader(SelectTop1MessageSqlFrom, t, messageIdParameter))
+                {
+                    reader.Read();
+                    message = CreateFromDataReader(reader);
+                }
+
+                if (message == null)
+                {
+                    return null;
+                }
+
+                FillHeaders(message, t);
+
+                return message;
+            });
+        }
+
+        public void DeleteMessagesFrom(IMessage message)
+        {
+            throw new NotImplementedException();
+        }
+
         internal long SizeDifferenceToStartCleaning { get; set; }
 
         internal bool Exists
         {
             get
             {
-                FileInfo fileInfo = new FileInfo(this.DatabasePath);
-                return File.Exists(this.DatabasePath) && fileInfo.Length >= 4096;
+                FileInfo fileInfo = new FileInfo(DatabasePath);
+                return File.Exists(DatabasePath) && fileInfo.Length >= 4096;
             }
         }
 
@@ -69,12 +108,12 @@ namespace Reyna
         {
             lock (Locker)
             {
-                if (this.Exists)
+                if (Exists)
                 {
                     return;
                 }
 
-                this.Create();
+                Create();
             }
         }
 
@@ -82,7 +121,7 @@ namespace Reyna
         {
             lock (Locker)
             {
-                this.ExecuteInTransaction((t) => this.InsertMessage(t, message));
+                ExecuteInTransaction(t => InsertMessage(t, message));
             }
         }
 
@@ -90,32 +129,32 @@ namespace Reyna
         {
             lock (Locker)
             {
-                this.ExecuteInTransaction(t =>
+                ExecuteInTransaction(t =>
                 {
-                    long dbSize = this.GetDbSize(t);
+                    long dbSize = GetDbSize(t);
 
-                    if (this.DbSizeApproachesLimit(dbSize, storageSizeLimit))
+                    if (DbSizeApproachesLimit(dbSize, storageSizeLimit))
                     {
-                        this.ClearOldRecords(t, message);
+                        ClearOldRecords(t, message);
                     }
 
-                    this.InsertMessage(t, message);
+                    InsertMessage(t, message);
                 });
             }
         }
 
         public IMessage Get()
         {
-            return this.GetFirstInQueue();
+            return GetFirstInQueue();
         }
 
         public IMessage Remove()
         {
-            return this.GetFirstInQueue((message, t) =>
+            return GetFirstInQueue((message, t) =>
             {
-                var sql = SQLiteRepository.DeleteMessageSql;
-                var messageId = this.CreateParameter("@messageId", message.Id);
-                this.ExecuteNonQuery(sql, t, messageId);
+                var sql = DeleteMessageSql;
+                var messageId = CreateParameter("@messageId", message.Id);
+                ExecuteNonQuery(sql, t, messageId);
             });
         }
 
@@ -123,10 +162,10 @@ namespace Reyna
         {
             lock (Locker)
             {
-                this.Execute(connection =>
+                Execute(connection =>
                 {
-                    limit -= this.SizeDifferenceToStartCleaning;
-                    long size = this.GetDbSize(connection);
+                    limit -= SizeDifferenceToStartCleaning;
+                    long size = GetDbSize(connection);
 
                     if (size <= limit)
                     {
@@ -135,9 +174,9 @@ namespace Reyna
 
                     do
                     {
-                        this.Shrink(connection, limit, size);
-                        this.Vacuum(connection);
-                        size = this.GetDbSize(connection);
+                        Shrink(connection, limit, size);
+                        Vacuum(connection);
+                        size = GetDbSize(connection);
                     }
                     while (size > limit);
                 });
@@ -146,73 +185,73 @@ namespace Reyna
 
         internal void Create()
         {
-            SQLiteConnection.CreateFile(this.DatabasePath);
+            SQLiteConnection.CreateFile(DatabasePath);
 
-            this.ExecuteInTransaction((t) =>
+            ExecuteInTransaction(t =>
             {
-                var sql = SQLiteRepository.CreateTableSql;
-                this.ExecuteNonQuery(sql, t);
+                var sql = CreateTableSql;
+                ExecuteNonQuery(sql, t);
             });
         }
 
         private void InsertMessage(DbTransaction transaction, IMessage message)
         {
-            var sql = SQLiteRepository.InsertMessageSql;
-            var url = this.CreateParameter("@url", message.Url);
-            var body = this.CreateParameter("@body", message.Body);
-            var id = Convert.ToInt32(this.ExecuteScalar(sql, transaction, url, body));
+            var sql = InsertMessageSql;
+            var url = CreateParameter("@url", message.Url);
+            var body = CreateParameter("@body", message.Body);
+            var id = Convert.ToInt32(ExecuteScalar(sql, transaction, url, body));
 
-            sql = SQLiteRepository.InsertHeaderSql;
-            var messageId = this.CreateParameter("@messageId", id);
+            sql = InsertHeaderSql;
+            var messageId = CreateParameter("@messageId", id);
 
             foreach (string headerKey in message.Headers.Keys)
             {
-                var key = this.CreateParameter("@key", headerKey);
-                var value = this.CreateParameter("@value", message.Headers[headerKey]);
-                this.ExecuteScalar(sql, transaction, messageId, key, value);
+                var key = CreateParameter("@key", headerKey);
+                var value = CreateParameter("@value", message.Headers[headerKey]);
+                ExecuteScalar(sql, transaction, messageId, key, value);
             }
 
-            if (this.MessageAdded != null)
+            if (MessageAdded != null)
             {
-                this.MessageAdded.Invoke(this, EventArgs.Empty);
+                MessageAdded.Invoke(this, EventArgs.Empty);
             }
         }
 
         private long GetDbSize(DbTransaction transaction)
         {
-            return (long)this.ExecuteScalar("pragma page_size", transaction) * (long)this.ExecuteScalar("pragma page_count", transaction);
+            return (long)ExecuteScalar("pragma page_size", transaction) * (long)ExecuteScalar("pragma page_count", transaction);
         }
 
         private long GetDbSize(DbConnection connection)
         {
-            return (long)this.ExecuteScalar("pragma page_size", connection) * (long)this.ExecuteScalar("pragma page_count", connection);
+            return (long)ExecuteScalar("pragma page_size", connection) * (long)ExecuteScalar("pragma page_count", connection);
         }
 
         private bool DbSizeApproachesLimit(long size, long limit)
         {
-            return (limit > size) && (limit - size) < this.SizeDifferenceToStartCleaning;
+            return (limit > size) && (limit - size) < SizeDifferenceToStartCleaning;
         }
 
         private void ClearOldRecords(DbTransaction transaction, IMessage message)
         {
-            long? oldestMessageId = this.FindOldestMessageIdWithType(transaction, message.Url);
+            long? oldestMessageId = FindOldestMessageIdWithType(transaction, message.Url);
 
             if (oldestMessageId.HasValue)
             {
-                this.RemoveExistingMessage(transaction, oldestMessageId.Value);
+                RemoveExistingMessage(transaction, oldestMessageId.Value);
             }
         }
 
         private void RemoveExistingMessage(DbTransaction transaction, long messageId)
         {
-            var messageParameter = this.CreateParameter("@messageid", messageId);
-            this.ExecuteNonQuery(SQLiteRepository.DeleteMessageSql, transaction, messageParameter);
+            var messageParameter = CreateParameter("@messageid", messageId);
+            ExecuteNonQuery(DeleteMessageSql, transaction, messageParameter);
         }
 
         private long? FindOldestMessageIdWithType(DbTransaction transaction, Uri type)
         {
-            var typeParameter = this.CreateParameter("@type", type);
-            object result = this.ExecuteScalar(SelectMinIdWithTypeSql, transaction, typeParameter);
+            var typeParameter = CreateParameter("@type", type);
+            object result = ExecuteScalar(SelectMinIdWithTypeSql, transaction, typeParameter);
 
             if (result is DBNull)
             {
@@ -225,55 +264,55 @@ namespace Reyna
         private void Shrink(DbConnection connection, long sizeLimit, long size)
         {
             double limitPercentage = 1 - ((double)sizeLimit / size);
-            long numberOfMessages = this.GetNumberOfMessages(connection);
+            long numberOfMessages = GetNumberOfMessages(connection);
             long numberOfMessagesToRemove = (long)Math.Round(numberOfMessages * limitPercentage);
             numberOfMessagesToRemove = numberOfMessagesToRemove == 0 ? 1 : numberOfMessagesToRemove;
 
-            long thresholdId = this.GetMessageIdToWhichShrink(connection, numberOfMessagesToRemove);
+            long thresholdId = GetMessageIdToWhichShrink(connection, numberOfMessagesToRemove);
 
-            this.ExecuteInTransaction((t) =>
+            ExecuteInTransaction(t =>
             {
-                this.RemoveFromHeadersToMessageId(t, thresholdId);
-                this.RemoveFromMessagesToId(t, thresholdId);
+                RemoveFromHeadersToMessageId(t, thresholdId);
+                RemoveFromMessagesToId(t, thresholdId);
             });
         }
 
         private long GetNumberOfMessages(DbConnection connection)
         {
-            return (long)this.ExecuteScalar(SelectNumberOfMessagesSql, connection);
+            return (long)ExecuteScalar(SelectNumberOfMessagesSql, connection);
         }
 
         private long GetMessageIdToWhichShrink(DbConnection connection, long numberOfMessagesToRemove)
         {
-            var offsetParameter = this.CreateParameter("@offset", numberOfMessagesToRemove);
-            return (long)this.ExecuteScalar(SelectMessageIdWithOffsetSql, connection, offsetParameter);
+            var offsetParameter = CreateParameter("@offset", numberOfMessagesToRemove);
+            return (long)ExecuteScalar(SelectMessageIdWithOffsetSql, connection, offsetParameter);
         }
 
         private void RemoveFromMessagesToId(DbTransaction transaction, long thresholdId)
         {
-            var id = this.CreateParameter("@id", thresholdId);
-            this.ExecuteNonQuery(DeleteMessagesToIdSql, transaction, id);
+            var id = CreateParameter("@id", thresholdId);
+            ExecuteNonQuery(DeleteMessagesToIdSql, transaction, id);
         }
 
         private void RemoveFromHeadersToMessageId(DbTransaction transaction, long thresholdId)
         {
-            var id = this.CreateParameter("@id", thresholdId);
-            this.ExecuteNonQuery(DeleteHeadersToMessageIdSql, transaction, id);
+            var id = CreateParameter("@id", thresholdId);
+            ExecuteNonQuery(DeleteHeadersToMessageIdSql, transaction, id);
         }
 
         private void Vacuum(DbConnection connection)
         {
-            this.ExecuteNonQuery("vacuum", connection);
+            ExecuteNonQuery("vacuum", connection);
         }
 
         private DbConnection CreateConnection()
         {
-            var connectionString = string.Format("Data Source={0}", this.DatabasePath);
+            var connectionString = string.Format("Data Source={0}", DatabasePath);
             var connection = new SQLiteConnection(connectionString);
 
-            if (this.Password != null && this.Password.Length > 0)
+            if (Password != null && Password.Length > 0)
             {
-                connection.SetPassword(this.Password);
+                connection.SetPassword(Password);
             }
 
             connection.Open();
@@ -316,7 +355,7 @@ namespace Reyna
 
         private int ExecuteNonQuery(string sql, DbTransaction transaction, params DbParameter[] parameters)
         {
-            using (var command = this.CreateCommand(sql, transaction, parameters))
+            using (var command = CreateCommand(sql, transaction, parameters))
             {
                 return command.ExecuteNonQuery();
             }
@@ -324,7 +363,7 @@ namespace Reyna
 
         private int ExecuteNonQuery(string sql, DbConnection connection, params DbParameter[] parameters)
         {
-            using (var command = this.CreateCommand(sql, connection, parameters))
+            using (var command = CreateCommand(sql, connection, parameters))
             {
                 return command.ExecuteNonQuery();
             }
@@ -332,7 +371,7 @@ namespace Reyna
 
         private object ExecuteScalar(string sql, DbTransaction transaction, params DbParameter[] parameters)
         {
-            using (var command = this.CreateCommand(sql, transaction, parameters))
+            using (var command = CreateCommand(sql, transaction, parameters))
             {
                 return command.ExecuteScalar();
             }
@@ -340,7 +379,7 @@ namespace Reyna
 
         private object ExecuteScalar(string sql, DbConnection connection, params DbParameter[] parameters)
         {
-            using (var command = this.CreateCommand(sql, connection, parameters))
+            using (var command = CreateCommand(sql, connection, parameters))
             {
                 return command.ExecuteScalar();
             }
@@ -348,7 +387,7 @@ namespace Reyna
 
         private DbDataReader ExecuteReader(string sql, DbTransaction transaction, params DbParameter[] parameters)
         {
-            using (var command = this.CreateCommand(sql, transaction, parameters))
+            using (var command = CreateCommand(sql, transaction, parameters))
             {
                 return command.ExecuteReader();
             }
@@ -356,7 +395,7 @@ namespace Reyna
 
         private IMessage ExecuteInTransaction(ExecuteFunctionInTransaction func)
         {
-            using (var connection = this.CreateConnection())
+            using (var connection = CreateConnection())
             using (var transaction = connection.BeginTransaction())
             {
                 var message = func(transaction);
@@ -367,7 +406,7 @@ namespace Reyna
 
         private void ExecuteInTransaction(Action<DbTransaction> action)
         {
-            using (var connection = this.CreateConnection())
+            using (var connection = CreateConnection())
             using (var transaction = connection.BeginTransaction())
             {
                 action(transaction);
@@ -377,7 +416,7 @@ namespace Reyna
 
         private void Execute(Action<DbConnection> action)
         {
-            using (var connection = this.CreateConnection())
+            using (var connection = CreateConnection())
             {
                 action(connection);
             }
@@ -385,15 +424,15 @@ namespace Reyna
 
         private IMessage GetFirstInQueue(params ExecuteActionInTransaction[] postActions)
         {
-            return this.ExecuteInTransaction((t) =>
+            return ExecuteInTransaction(t =>
             {
                 IMessage message = null;
 
-                var sql = SQLiteRepository.SelectTop1MessageSql;
-                using (var reader = this.ExecuteReader(sql, t))
+                var sql = SelectTop1MessageSql;
+                using (var reader = ExecuteReader(sql, t))
                 {
                     reader.Read();
-                    message = this.CreateFromDataReader(reader);
+                    message = CreateFromDataReader(reader);
                 }
 
                 if (message == null)
@@ -401,16 +440,16 @@ namespace Reyna
                     return null;
                 }
 
-                sql = SQLiteRepository.SelectHeaderSql;
-                var messageId = this.CreateParameter("@messageId", message.Id);
-                using (var reader = this.ExecuteReader(sql, t, messageId))
+                sql = SelectHeaderSql;
+                var messageId = CreateParameter("@messageId", message.Id);
+                using (var reader = ExecuteReader(sql, t, messageId))
                 {
                     while (reader.Read())
                     {
-                        this.AddHeader(message, reader);
+                        AddHeader(message, reader);
                     }
 
-                    this.AddReynaHeader(message);
+                    AddReynaHeader(message);
                 }
 
                 foreach (var postAction in postActions)
@@ -439,6 +478,20 @@ namespace Reyna
             };
 
             return message;
+        }
+
+        private void FillHeaders(IMessage message, DbTransaction t)
+        {
+            var messageId = CreateParameter("@messageId", message.Id);
+            using (var reader = ExecuteReader(SelectHeaderSql, t, messageId))
+            {
+                while (reader.Read())
+                {
+                    AddHeader(message, reader);
+                }
+
+                AddReynaHeader(message);
+            }
         }
 
         private void AddHeader(IMessage message, DbDataReader reader)

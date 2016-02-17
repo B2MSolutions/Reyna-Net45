@@ -1,9 +1,11 @@
 ﻿
+using System;
+
 namespace Reyna
 {
     public interface IPreferences
     {
-        global::Reyna.TimeRange CellularDataBlackout { get; }
+        TimeRange CellularDataBlackout { get; }
         bool OffChargeBlackout { get; }
         bool OnChargeBlackout { get; }
         void ResetCellularDataBlackout();
@@ -13,7 +15,7 @@ namespace Reyna
         void ResetWlanBlackoutRange();
         void ResetWwanBlackoutRange();
         bool RoamingBlackout { get; }
-        void SetCellularDataBlackout(global::Reyna.TimeRange range);
+        void SetCellularDataBlackout(TimeRange range);
         void SetOffChargeBlackout(bool value);
         void SetOnChargeBlackout(bool value);
         void SetRoamingBlackout(bool value);
@@ -27,5 +29,8 @@ namespace Reyna
         int ForwardServiceTemporaryErrorBackout {get; }
         int ForwardServiceMessageBackout { get; }
         void SaveCellularDataAsWwanForBackwardsCompatibility();
+        Uri BatchUploadUrl { get; }
+        bool BatchUpload { get; }
+        long BatchUploadCheckInterval { get; }
     }
 }

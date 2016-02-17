@@ -3,7 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     internal sealed class InMemoryQueue : IRepository
     {
@@ -13,16 +13,33 @@
 
         public InMemoryQueue()
         {
-            this.queue = new Queue<IMessage>();
+            queue = new Queue<IMessage>();
         }
 
         public event EventHandler<EventArgs> MessageAdded;
+
+        public long AvailableMessagesCount {
+            get
+            {
+                return queue.Count;
+            }
+        }
+
+        public IMessage GetNextMessageAfter(long messageId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteMessagesFrom(IMessage message)
+        {
+            throw new NotImplementedException();
+        }
 
         private object SyncRoot
         {
             get
             {
-                return ((ICollection)this.queue).SyncRoot;
+                return ((ICollection)queue).SyncRoot;
             }
         }
 
@@ -32,52 +49,52 @@
 
         public void Add(IMessage message)
         {
-            lock (this.SyncRoot)
+            lock (SyncRoot)
             {
-                this.queue.Enqueue(message);
-                this.FireMessageAdded();
+                queue.Enqueue(message);
+                FireMessageAdded();
             }
         }
 
         public void Add(IMessage message, long storageSizeLimit)
         {
-            this.Add(message);
+            Add(message);
         }
 
         public IMessage Get()
         {
-            lock (this.SyncRoot)
+            lock (SyncRoot)
             {
-                if (this.queue.Count == 0)
+                if (queue.Count == 0)
                 {
                     return null;
                 }
 
-                return this.queue.Peek();
+                return queue.Peek();
             }
         }
 
         public IMessage Remove()
         {
-            lock (this.SyncRoot)
+            lock (SyncRoot)
             {
-                if (this.queue.Count == 0)
+                if (queue.Count == 0)
                 {
                     return null;
                 }
 
-                return this.queue.Dequeue();
+                return queue.Dequeue();
             }
         }
 
         private void FireMessageAdded()
         {
-            if (this.MessageAdded == null)
+            if (MessageAdded == null)
             {
                 return;
             }
 
-            this.MessageAdded.Invoke(this, new EventArgs());
+            MessageAdded.Invoke(this, new EventArgs());
         }
 
         public void ShrinkDb(long limit) { }
