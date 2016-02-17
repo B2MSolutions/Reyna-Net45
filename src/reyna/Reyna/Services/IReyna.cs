@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Reyna.Interfaces
 {
     public interface IReyna : IService
@@ -13,5 +15,6 @@ namespace Reyna.Interfaces
         void SetStorageSizeLimit(long limit);
         void ResetStorageSizeLimit();
         long StorageSizeLimit { get; }
+        void SetBatchUploadConfiguration(bool value, Uri url, long checkInterval);
     }
 }

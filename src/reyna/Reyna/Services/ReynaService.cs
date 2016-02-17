@@ -3,7 +3,7 @@
 namespace Reyna
 {
     using Interfaces;
-
+    using System;
     public sealed class ReynaService : IReyna
     {
         internal const long MinimumStorageLimit = 1867776; // 1Mb 800Kb
@@ -138,6 +138,13 @@ namespace Reyna
         public void Put(IMessage message)
         {
             VolatileStore.Add(message);
+        }
+
+        public void SetBatchUploadConfiguration(bool value, Uri url, long checkInterval)
+        {
+            Preferences.SaveBatchUpload(value);
+            Preferences.SaveBatchUploadUrl(url);
+            Preferences.SaveBatchUploadCheckInterval(checkInterval);
         }
 
         public void EnableLogging(ILogDelegate logDelegate)

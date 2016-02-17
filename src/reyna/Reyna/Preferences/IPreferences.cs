@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Reyna
 {
     public interface IPreferences
@@ -27,5 +29,11 @@ namespace Reyna
         int ForwardServiceTemporaryErrorBackout {get; }
         int ForwardServiceMessageBackout { get; }
         void SaveCellularDataAsWwanForBackwardsCompatibility();
+        void SaveBatchUpload(bool value);
+        void SaveBatchUploadUrl(Uri url);
+        void SaveBatchUploadCheckInterval(long checkInterval);
+        bool BatchUpload{ get; }
+        Uri BatchUploadUrl { get; }
+        long BatchUploadCheckInterval { get; }
     }
 }
