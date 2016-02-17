@@ -32,7 +32,7 @@
         [Fact]
         public void whenCallingInitialiseShouldInitialiseClassCorrectly()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000, false);
 
             Assert.Equal(this.persistentStore.Object, this.service.SourceStore);
             Assert.Equal(this.httpClient.Object, this.service.HttpClient);
@@ -44,25 +44,25 @@
         [Fact]
         public void whenCallingInitialiseWithNullHttpClientShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(this.persistentStore.Object, null, this.networkStateService.Object, 10000, 5000));
+            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(this.persistentStore.Object, null, this.networkStateService.Object, 10000, 5000, false));
         }
 
         [Fact]
         public void whenCallingInitialiseWithNullNullNetworkStateServiceShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, null, 10000, 5000));
+            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, null, 10000, 5000, false));
         }
 
         [Fact]
         public void whenCallingInitialiseWithNullNullSourceStoreShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(null, this.httpClient.Object, this.networkStateService.Object, 10000, 5000));
+            Assert.Throws<ArgumentNullException>(() => this.service.Initialize(null, this.httpClient.Object, this.networkStateService.Object, 10000, 5000, false));
         }
 
         [Fact]
         public void whenCallingStartShouldCallWaitHandle()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000, false);
 
             this.service.Start();
             Thread.Sleep(50);
@@ -75,7 +75,7 @@
         [Fact]
         public void whenCallingStartAndThereIsAMessageShouldCallSendOnHttpClientAndRemoveTheMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 10000, 5000, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
@@ -91,7 +91,7 @@
         [Fact]
         public void whenCallingDoWorkAndHttpClientReturnsTemporaryErrorShouldNotRemoveMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 1, 1);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 1, 1, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
@@ -110,7 +110,7 @@
         [Fact]
         public void whenCallingDoWorkAndHttpClientReturnsblackoutShouldNotRemoveMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
@@ -129,7 +129,7 @@
         [Fact]
         public void whenCallingDoWorkAndHttpClientReturnsNotConnectedShouldNotRemoveMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
@@ -148,7 +148,7 @@
         [Fact]
         public void whenCallingDoWorkAndServiceIsTerminatingShouldNotSendMessage()
         {
-            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0);
+            this.service.Initialize(this.persistentStore.Object, this.httpClient.Object, this.networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 

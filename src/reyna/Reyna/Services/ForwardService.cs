@@ -1,9 +1,8 @@
-﻿
-namespace Reyna
+﻿namespace Reyna
 {
     using System;
     using System.Threading;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     internal sealed class ForwardService : ServiceBase, IForwardService
     {
@@ -12,6 +11,8 @@ namespace Reyna
         internal IHttpClient HttpClient { get; set; }
         internal INetworkStateService NetworkState { get; set; }
         internal IReynaLogger Logger { get; set; }
+        internal IMessageProvider MessageProvider { get; set; }
+        internal IPeriodicBackoutCheck PeriodicBackoutCheck { get; set; }
 
         public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger)
             : base(waitHandle, true)
@@ -23,28 +24,28 @@ namespace Reyna
 
         protected override void ThreadStart()
         {
-            while (!this.Terminate)
+            while (!Terminate)
             {
-                this.DoWork();
+                DoWork();
             }
         }
 
         internal void DoWork()
         {
-            this.WaitHandle.WaitOne();
+            WaitHandle.WaitOne();
             IMessage message = null;
             Logger.Info("Reyna.ForwardService DoWork enter");
-            while (!this.Terminate && !_snoozing && (message = this.SourceStore.Get()) != null)
+            while (!Terminate && !_snoozing && (message = SourceStore.Get()) != null)
             {
-                var result = this.HttpClient.Post(message);
+                var result = HttpClient.Post(message);
                 if (result == Result.TemporaryError)
                 {
                     // Schedule a retry, after a suitable snooze.
 
                     _snoozing = true;
 
-                    var timer = new System.Timers.Timer{ AutoReset = false, Enabled = true, Interval = this.TemporaryErrorMilliseconds };
-                    timer.Elapsed += (source, args) => { _snoozing = false; this.WaitHandle.Set(); };
+                    var timer = new System.Timers.Timer{ AutoReset = false, Enabled = true, Interval = TemporaryErrorMilliseconds };
+                    timer.Elapsed += (source, args) => { _snoozing = false; WaitHandle.Set(); };
 
                     break;
                 }
@@ -54,11 +55,11 @@ namespace Reyna
                     break;
                 }
 
-                this.SourceStore.Remove();
-                Thread.Sleep(this.SleepMilliseconds);
+                SourceStore.Remove();
+                Thread.Sleep(SleepMilliseconds);
             }
 
-            this.WaitHandle.Reset();
+            WaitHandle.Reset();
             Logger.Info("Reyna.ForwardService DoWork exit");
         }
 
@@ -66,16 +67,16 @@ namespace Reyna
         {
             Logger.Info("Reyna.ForwardService OnNetworkConnected");
            
-            if (this.Terminate)
+            if (Terminate)
             {
                 return;
             }
 
-            this.SignalWorkToDo();
+            SignalWorkToDo();
         }
 
         public void Initialize(IRepository sourceStore, IHttpClient httpClient, INetworkStateService networkState, 
-            int temporaryErrorMilliseconds, int sleepMilliseconds)
+            int temporaryErrorMilliseconds, int sleepMilliseconds, bool batchUpload)
         {
             Logger.Info("Reyna.ForwardService Initialize enter");
          
@@ -89,15 +90,24 @@ namespace Reyna
                 throw new ArgumentNullException("networkState");
             }
 
-            this.HttpClient = httpClient;
-            this.NetworkState = networkState;
+            HttpClient = httpClient;
+            NetworkState = networkState;
 
-            this.TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
-            this.SleepMilliseconds = sleepMilliseconds;
+            TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
+            SleepMilliseconds = sleepMilliseconds;
 
-            this.NetworkState.NetworkConnected += this.OnNetworkConnected;
+            NetworkState.NetworkConnected += OnNetworkConnected;
 
-            base.Initialize(sourceStore);
+            if (batchUpload)
+            {
+                MessageProvider = new BatchProvider(sourceStore, PeriodicBackoutCheck, new BatchConfiguration(new Preferences(new Registry())));
+            }
+            else
+            {
+                MessageProvider = new MessageProvider(sourceStore);
+            }
+
+            Initialize(sourceStore);
 
             Logger.Info("Reyna.ForwardService Initialize exit");
         }

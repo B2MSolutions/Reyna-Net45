@@ -38,7 +38,7 @@ namespace Reyna
             Logger = container.Resolve<IReynaLogger>();
 
             StoreService.Initialize(VolatileStore, PersistentStore);
-            ForwardService.Initialize(PersistentStore, HttpClient, NetworkStateService, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout);
+            ForwardService.Initialize(PersistentStore, HttpClient, NetworkStateService, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout, false);
                                             
             Password = password;
 

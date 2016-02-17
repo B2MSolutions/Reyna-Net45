@@ -1,13 +1,8 @@
 ﻿namespace Reyna.Facts
 {
-    using System.IO;
-    using Microsoft.Win32;
     using Moq;
-    using Reyna.Interfaces;
+    using Interfaces;
     using Xunit;
-    using Xunit.Extensions;
-    using Microsoft.Practices.Unity;
-    using System.Net;
     using System.Text;
     using System.Linq;
 
@@ -68,7 +63,7 @@
             var helper = new TestUnityHelper();
             var container = helper.GetContainer();
             ReynaService service = new ReynaService(null, container);
-            helper.mockForwardService.Verify(s => s.Initialize(helper.mockSqlStore.Object, helper.mockHttpClient.Object, helper.mockNetworkStateService.Object, It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
+            helper.mockForwardService.Verify(s => s.Initialize(helper.mockSqlStore.Object, helper.mockHttpClient.Object, helper.mockNetworkStateService.Object, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>()), Times.Exactly(1));
         }
 
         [Theory]
