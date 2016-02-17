@@ -23,29 +23,29 @@
 
         public GivenAReynaService()
         {
-            this.service = new ReynaService(null, this.unity.GetContainer());
-            this.httpClient = this.unity.mockHttpClient;
-            this.preferences = this.unity.mockPreferences;
-            this.persistentStore = this.unity.mockSqlStore;
-            this.volatileStore = this.unity.mockVolatileStore;
-            this.networkStateService = this.unity.mockNetworkStateService;
-            this.storeService = this.unity.mockStoreService;
-            this.forwardService = this.unity.mockForwardService;
-            this.encryptionChecker = this.unity.mockEncryptionChecker;
-            this.reynaLogger = this.unity.mockReynaLogger;
+            service = new ReynaService(null, unity.GetContainer());
+            httpClient = unity.mockHttpClient;
+            preferences = unity.mockPreferences;
+            persistentStore = unity.mockSqlStore;
+            volatileStore = unity.mockVolatileStore;
+            networkStateService = unity.mockNetworkStateService;
+            storeService = unity.mockStoreService;
+            forwardService = unity.mockForwardService;
+            encryptionChecker = unity.mockEncryptionChecker;
+            reynaLogger = unity.mockReynaLogger;
         }
 
         [Fact]
         public void WhenConstructingShouldRegisterCorrectObjectInstancesFromUnity()
         {
-            Assert.Same(this.httpClient.Object, this.service.HttpClient);
-            Assert.Same(this.preferences.Object, this.service.Preferences);
-            Assert.Same(this.volatileStore.Object, this.service.VolatileStore);
-            Assert.Same(this.persistentStore.Object, this.service.PersistentStore);
-            Assert.Same(this.networkStateService.Object, this.service.NetworkStateService);
-            Assert.Same(this.forwardService.Object, this.service.ForwardService);
-            Assert.Same(this.encryptionChecker.Object, this.service.EncryptionChecker);
-            Assert.Same(this.reynaLogger.Object, this.service.Logger);
+            Assert.Same(httpClient.Object, service.HttpClient);
+            Assert.Same(preferences.Object, service.Preferences);
+            Assert.Same(volatileStore.Object, service.VolatileStore);
+            Assert.Same(persistentStore.Object, service.PersistentStore);
+            Assert.Same(networkStateService.Object, service.NetworkStateService);
+            Assert.Same(forwardService.Object, service.ForwardService);
+            Assert.Same(encryptionChecker.Object, service.EncryptionChecker);
+            Assert.Same(reynaLogger.Object, service.Logger);
         }
 
         [Fact]
@@ -72,123 +72,123 @@
         [InlineData(987621)]
         public void WhenCallingGetStorageSizeLimitShouldReturnValueFromPreferences(long limit)
         {
-            this.preferences.SetupGet(p => p.StorageSizeLimit).Returns(limit);
-            Assert.Equal(limit, this.service.StorageSizeLimit);
+            preferences.SetupGet(p => p.StorageSizeLimit).Returns(limit);
+            Assert.Equal(limit, service.StorageSizeLimit);
         }
 
         [Fact]
         public void WhenCallingResetStorageSizeLimitShouldCallPreferences()
         {
-            this.service.ResetStorageSizeLimit();
-            this.preferences.Verify(p => p.ResetStorageSizeLimit(), Times.Exactly(1));
+            service.ResetStorageSizeLimit();
+            preferences.Verify(p => p.ResetStorageSizeLimit(), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetCellularDataBlackoutShouldCallPreferences()
         {
             var range = new TimeRange(new Time(300), new Time(500));
-            this.service.SetCellularDataBlackout(range);
-            this.preferences.Verify(p => p.SetCellularDataBlackout(range), Times.Exactly(1));
+            service.SetCellularDataBlackout(range);
+            preferences.Verify(p => p.SetCellularDataBlackout(range), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingResetCellularDataBlackoutShouldCallPreferences()
         {
-            this.service.ResetCellularDataBlackout();
-            this.preferences.Verify(p => p.ResetCellularDataBlackout(), Times.Exactly(1));
+            service.ResetCellularDataBlackout();
+            preferences.Verify(p => p.ResetCellularDataBlackout(), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetWlanBlackoutRangeShouldCallPreferences()
         {
             string range = "range";
-            this.service.SetWlanBlackoutRange(range);
-            this.preferences.Verify(p => p.SetWlanBlackoutRange(range), Times.Exactly(1));
+            service.SetWlanBlackoutRange(range);
+            preferences.Verify(p => p.SetWlanBlackoutRange(range), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetWwanBlackoutRangeShouldCallPreferences()
         {
             string range = "range";
-            this.service.SetWwanBlackoutRange(range);
-            this.preferences.Verify(p => p.SetWwanBlackoutRange(range), Times.Exactly(1));
+            service.SetWwanBlackoutRange(range);
+            preferences.Verify(p => p.SetWwanBlackoutRange(range), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetRoamingBlackoutShouldCallPreferences()
         {
             bool blackout = false;
-            this.service.SetRoamingBlackout(blackout);
-            this.preferences.Verify(p => p.SetRoamingBlackout(blackout), Times.Exactly(1));
+            service.SetRoamingBlackout(blackout);
+            preferences.Verify(p => p.SetRoamingBlackout(blackout), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetOnChargeBlackoutShouldCallPreferences()
         {
             bool blackout = true;
-            this.service.SetOnChargeBlackout(blackout);
-            this.preferences.Verify(p => p.SetOnChargeBlackout(blackout), Times.Exactly(1));
+            service.SetOnChargeBlackout(blackout);
+            preferences.Verify(p => p.SetOnChargeBlackout(blackout), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetOffChargeBlackoutShouldCallPreferences()
         {
             bool blackout = false;
-            this.service.SetOffChargeBlackout(blackout);
-            this.preferences.Verify(p => p.SetOffChargeBlackout(blackout), Times.Exactly(1));
+            service.SetOffChargeBlackout(blackout);
+            preferences.Verify(p => p.SetOffChargeBlackout(blackout), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetStorageSizeLimitShouldInitialiseThePersistentStoreAndShrinkTheDatabase()
         {
             long limit = 2867776;
-            this.service.SetStorageSizeLimit(limit);
-            this.persistentStore.Verify(s => s.Initialise(), Times.Exactly(1));
-            this.persistentStore.Verify(s => s.ShrinkDb(limit), Times.Exactly(1));
+            service.SetStorageSizeLimit(limit);
+            persistentStore.Verify(s => s.Initialise(), Times.Exactly(1));
+            persistentStore.Verify(s => s.ShrinkDb(limit), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetPersistentStoreAndStorageSizeLimitBelowMinimumShouldSetTheLimitToMinimum()
         {
             long limit = 186777;
-            this.service.SetStorageSizeLimit(limit);
-            this.persistentStore.Verify(s => s.Initialise(), Times.Exactly(1));
-            this.persistentStore.Verify(s => s.ShrinkDb(ReynaService.MinimumStorageLimit), Times.Exactly(1));
+            service.SetStorageSizeLimit(limit);
+            persistentStore.Verify(s => s.Initialise(), Times.Exactly(1));
+            persistentStore.Verify(s => s.ShrinkDb(ReynaService.MinimumStorageLimit), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingSetStorageSizeShouldCallPreferences()
         {
             long limit = 2186777;
-            this.service.SetStorageSizeLimit(limit);
-            this.preferences.Verify(p => p.SetStorageSizeLimit(limit), Times.Exactly(1));
+            service.SetStorageSizeLimit(limit);
+            preferences.Verify(p => p.SetStorageSizeLimit(limit), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingStartShouldStartAllServices()
         {
-            this.service.Start();
-            this.storeService.Verify(s => s.Start(), Times.Exactly(1));
-            this.forwardService.Verify(s => s.Start(), Times.Exactly(1));
-            this.networkStateService.Verify(s => s.Start(), Times.Exactly(1));
+            service.Start();
+            storeService.Verify(s => s.Start(), Times.Exactly(1));
+            forwardService.Verify(s => s.Start(), Times.Exactly(1));
+            networkStateService.Verify(s => s.Start(), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingStopShouldStopAllServices()
         {
-            this.service.Stop();
-            this.storeService.Verify(s => s.Stop(), Times.Exactly(1));
-            this.forwardService.Verify(s => s.Stop(), Times.Exactly(1));
-            this.networkStateService.Verify(s => s.Stop(), Times.Exactly(1));
+            service.Stop();
+            storeService.Verify(s => s.Stop(), Times.Exactly(1));
+            forwardService.Verify(s => s.Stop(), Times.Exactly(1));
+            networkStateService.Verify(s => s.Stop(), Times.Exactly(1));
         }
 
         [Fact]
         public void WhenCallingDisposeShouldDisposeAllServices()
         {
-            this.service.Dispose();
-            this.storeService.Verify(s => s.Dispose(), Times.Exactly(1));
-            this.forwardService.Verify(s => s.Dispose(), Times.Exactly(1));
-            this.networkStateService.Verify(s => s.Dispose(), Times.Exactly(1));
+            service.Dispose();
+            storeService.Verify(s => s.Dispose(), Times.Exactly(1));
+            forwardService.Verify(s => s.Dispose(), Times.Exactly(1));
+            networkStateService.Verify(s => s.Dispose(), Times.Exactly(1));
         }
 
         [Fact]
@@ -260,8 +260,8 @@
         public void WhenCallingPutShouldCallVolatileStore()
         {
             IMessage message = new Message(new System.Uri("http://testuri.com"), "body");
-            this.service.Put(message);
-            this.volatileStore.Verify(s => s.Add(message), Times.Exactly(1));
+            service.Put(message);
+            volatileStore.Verify(s => s.Add(message), Times.Exactly(1));
         }
 
         [Fact]

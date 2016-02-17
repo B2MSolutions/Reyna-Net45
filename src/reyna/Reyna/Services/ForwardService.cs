@@ -14,13 +14,15 @@
         internal IMessageProvider MessageProvider { get; set; }
         internal IPeriodicBackoutCheck PeriodicBackoutCheck { get; set; }
 
-        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger)
+        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger, IBatchConfiguration batchConfiguration)
             : base(waitHandle, true)
         {
             Logger = logger;
+            _batchConfiguration = batchConfiguration;
         }
-        
+
         private bool _snoozing;
+        private readonly IBatchConfiguration _batchConfiguration;
 
         protected override void ThreadStart()
         {
@@ -33,7 +35,7 @@
         internal void DoWork()
         {
             WaitHandle.WaitOne();
-            IMessage message = null;
+            IMessage message;
             Logger.Info("Reyna.ForwardService DoWork enter");
             while (!Terminate && !_snoozing && (message = SourceStore.Get()) != null)
             {
@@ -100,7 +102,7 @@
 
             if (batchUpload)
             {
-                MessageProvider = new BatchProvider(sourceStore, PeriodicBackoutCheck, new BatchConfiguration(new Preferences(new Registry())));
+                MessageProvider = new BatchProvider(sourceStore, PeriodicBackoutCheck, _batchConfiguration);
             }
             else
             {
