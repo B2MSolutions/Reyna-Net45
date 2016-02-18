@@ -260,6 +260,21 @@
             }
         }
 
+        public void SaveBatchUpload(bool value)
+        {
+            SetRegistryValue(BatchUploadKeyName, value);
+        }
+
+        public void SaveBatchUploadUrl(Uri url)
+        {
+            SetRegistryValue(BatchUploadUriKeyName, url.ToString());
+        }
+
+        public void SaveBatchUploadCheckInterval(long checkInterval)
+        {
+            SetRegistryValue(BatchUploadIntervalKeyName, checkInterval);
+        }
+
         public void SetStorageSizeLimit(long limit)
         {
             SetRegistryValue(StorageSizeLimitKeyName, limit);

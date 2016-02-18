@@ -32,5 +32,8 @@ namespace Reyna
         Uri BatchUploadUrl { get; }
         bool BatchUpload { get; }
         long BatchUploadCheckInterval { get; }
+        void SaveBatchUpload(bool value);
+        void SaveBatchUploadUrl(Uri url);
+        void SaveBatchUploadCheckInterval(long checkInterval);
     }
 }

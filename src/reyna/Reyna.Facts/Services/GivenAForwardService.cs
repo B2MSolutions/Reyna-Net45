@@ -15,6 +15,7 @@
         private readonly Mock<INetworkStateService> _networkStateService;
         private readonly Mock<IRepository> _persistentStore;
         private readonly Mock<IBatchConfiguration> _batchConfiguration;
+        private readonly Mock<IPeriodicBackoutCheck> _periodicBackoutCheck;
 
         public GivenAForwardService()
         {
@@ -23,9 +24,10 @@
             _networkStateService = new Mock<INetworkStateService>();
             _persistentStore = new Mock<IRepository>();
             _batchConfiguration = new Mock<IBatchConfiguration>();
+            _periodicBackoutCheck = new Mock<IPeriodicBackoutCheck>();
             var loggerMock = new Mock<IReynaLogger>();
 
-            _service = new ForwardService(_waitHandle.Object, loggerMock.Object, _batchConfiguration.Object);
+            _service = new ForwardService(_waitHandle.Object, loggerMock.Object, _batchConfiguration.Object, _periodicBackoutCheck.Object);
         }
 
         [Fact]

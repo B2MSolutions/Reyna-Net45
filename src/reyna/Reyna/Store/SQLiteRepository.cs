@@ -13,6 +13,7 @@
         private const string InsertMessageSql = "INSERT INTO Message(url, body) VALUES(@url, @body); SELECT last_insert_rowid();";
         private const string InsertHeaderSql = "INSERT INTO Header(messageid, key, value) VALUES(@messageId, @key, @value);";
         private const string DeleteMessageSql = "DELETE FROM Header WHERE messageid = @messageId;DELETE FROM Message WHERE id = @messageId";
+        private const string DeleteMessagesFromSql = "DELETE FROM Header WHERE messageid <= @messageId;DELETE FROM Message WHERE id <= @messageId";
         private const string SelectTop1MessageSql = "SELECT id, url, body FROM Message ORDER BY id ASC LIMIT 1";
         private const string SelectTop1MessageSqlFrom = "SELECT id, url, body FROM Message WHERE id > @messageId ORDER BY id ASC LIMIT 1";
         private const string SelectHeaderSql = "SELECT key, value FROM Header WHERE messageid = @messageId";
@@ -79,7 +80,13 @@
 
         public void DeleteMessagesFrom(IMessage message)
         {
-            throw new NotImplementedException();
+            if (message == null)
+            {
+                return;
+            }
+
+            var messageId = this.CreateParameter("@messageId", message.Id);
+            this.ExecuteInTransaction((t) => this.ExecuteNonQuery(SQLiteRepository.DeleteMessagesFromSql, t, messageId));
         }
 
         internal long SizeDifferenceToStartCleaning { get; set; }

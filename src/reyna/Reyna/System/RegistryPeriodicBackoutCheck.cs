@@ -4,9 +4,14 @@
 
     internal class RegistryPeriodicBackoutCheck : IPeriodicBackoutCheck
     {
-        public RegistryPeriodicBackoutCheck(IRegistry registry, string key)
+        public RegistryPeriodicBackoutCheck(IRegistry registry)
         {
             this.Registry = registry;
+            this.PeriodicalTasksKeyName = @"Software\Reyna\PeriodicBackoutCheck";
+        }
+
+        public void SetPeriodicalTasksKeyName(string key)
+        {
             this.PeriodicalTasksKeyName = key;
         }
 

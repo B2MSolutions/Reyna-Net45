@@ -6,23 +6,25 @@
 
     internal sealed class ForwardService : ServiceBase, IForwardService
     {
+        private const string PeriodicBackoutCheckTag = "ForwardService";
+        private bool _snoozing;
+        private readonly IBatchConfiguration _batchConfiguration;
+
         internal int TemporaryErrorMilliseconds { get; set; }
         internal int SleepMilliseconds { get; set; }
         internal IHttpClient HttpClient { get; set; }
         internal INetworkStateService NetworkState { get; set; }
-        internal IReynaLogger Logger { get; set; }
+        private IReynaLogger Logger { get; set; }
         internal IMessageProvider MessageProvider { get; set; }
-        internal IPeriodicBackoutCheck PeriodicBackoutCheck { get; set; }
+        private IPeriodicBackoutCheck PeriodicBackoutCheck { get; set; }
 
-        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger, IBatchConfiguration batchConfiguration)
+        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger, IBatchConfiguration batchConfiguration, IPeriodicBackoutCheck periodicBackoutCheck)
             : base(waitHandle, true)
         {
             Logger = logger;
             _batchConfiguration = batchConfiguration;
+            PeriodicBackoutCheck = periodicBackoutCheck;
         }
-
-        private bool _snoozing;
-        private readonly IBatchConfiguration _batchConfiguration;
 
         protected override void ThreadStart()
         {
@@ -35,32 +37,46 @@
         internal void DoWork()
         {
             WaitHandle.WaitOne();
-            IMessage message;
             Logger.Info("Reyna.ForwardService DoWork enter");
-            while (!Terminate && !_snoozing && (message = SourceStore.Get()) != null)
+
+            if (CanSend)
             {
-                var result = HttpClient.Post(message);
-                if (result == Result.TemporaryError)
+                IMessage message;
+                while (!Terminate && !_snoozing && (message = MessageProvider.GetNext()) != null)
                 {
-                    // Schedule a retry, after a suitable snooze.
+                    var result = HttpClient.Post(message);
+                    if (result == Result.TemporaryError)
+                    {
+                        // Schedule a retry, after a suitable snooze.
 
-                    _snoozing = true;
+                        _snoozing = true;
 
-                    var timer = new System.Timers.Timer{ AutoReset = false, Enabled = true, Interval = TemporaryErrorMilliseconds };
-                    timer.Elapsed += (source, args) => { _snoozing = false; WaitHandle.Set(); };
+                        var timer = new System.Timers.Timer
+                        {
+                            AutoReset = false,
+                            Enabled = true,
+                            Interval = TemporaryErrorMilliseconds
+                        };
+                        timer.Elapsed += (source, args) =>
+                        {
+                            _snoozing = false;
+                            WaitHandle.Set();
+                        };
 
-                    break;
+                        break;
+                    }
+
+                    if (result == Result.Blackout || result == Result.NotConnected)
+                    {
+                        break;
+                    }
+
+                    MessageProvider.Delete(message);
+                    Thread.Sleep(SleepMilliseconds);
                 }
 
-                if (result == Result.Blackout || result == Result.NotConnected)
-                {
-                    break;
-                }
-
-                SourceStore.Remove();
-                Thread.Sleep(SleepMilliseconds);
+                MessageProvider.Close();
             }
-
             WaitHandle.Reset();
             Logger.Info("Reyna.ForwardService DoWork exit");
         }
@@ -99,6 +115,7 @@
             SleepMilliseconds = sleepMilliseconds;
 
             NetworkState.NetworkConnected += OnNetworkConnected;
+            PeriodicBackoutCheck.SetPeriodicalTasksKeyName(@"Software\Reyna\PeriodicBackoutCheck");
 
             if (batchUpload)
             {
@@ -112,6 +129,14 @@
             Initialize(sourceStore);
 
             Logger.Info("Reyna.ForwardService Initialize exit");
+        }
+
+        private bool CanSend
+        {
+            get
+            {
+                return MessageProvider.CanSend && PeriodicBackoutCheck.IsTimeElapsed(PeriodicBackoutCheckTag, TemporaryErrorMilliseconds);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Unity;
+﻿using System;
+using Microsoft.Practices.Unity;
 
 namespace Reyna
 {
@@ -38,7 +39,7 @@ namespace Reyna
             Logger = container.Resolve<IReynaLogger>();
 
             StoreService.Initialize(VolatileStore, PersistentStore);
-            ForwardService.Initialize(PersistentStore, HttpClient, NetworkStateService, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout, false);
+            ForwardService.Initialize(PersistentStore, HttpClient, NetworkStateService, Preferences.ForwardServiceTemporaryErrorBackout, Preferences.ForwardServiceMessageBackout, Preferences.BatchUpload);
                                             
             Password = password;
 
@@ -103,6 +104,13 @@ namespace Reyna
         public void SetOffChargeBlackout(bool value)
         {
             Preferences.SetOffChargeBlackout(value);
+        }
+
+        public void SetBatchUploadConfiguration(bool value, Uri url, long checkInterval)
+        {
+            Preferences.SaveBatchUpload(value);
+            Preferences.SaveBatchUploadUrl(url);
+            Preferences.SaveBatchUploadCheckInterval(checkInterval);
         }
 
         public void Start()
