@@ -3,6 +3,7 @@
 namespace Reyna.Facts
 {
     using Microsoft.Win32;
+    using System;
     using Xunit;
 
     public class GivenAPreferences

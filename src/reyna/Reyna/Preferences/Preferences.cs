@@ -119,8 +119,8 @@
         {
             get
             {
-                long twentyFourHours = 24 * 60 * 60 * 1000;
-                return GetRegistryValue(BatchUploadIntervalKeyName, twentyFourHours);
+                long sixHours = 6 * 60 * 60 * 1000;
+                return GetRegistryValue(BatchUploadIntervalKeyName, sixHours);
             }
         }
 
@@ -278,7 +278,7 @@
         {
             SetRegistryValue(BatchUploadUriKeyName, url.ToString());
         }
-
+        
         public void SaveBatchUploadInterval(long interval)
         {
             SetRegistryValue(BatchUploadIntervalKeyName, interval);
