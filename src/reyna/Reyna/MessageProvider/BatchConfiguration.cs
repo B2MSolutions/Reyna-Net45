@@ -50,5 +50,10 @@
                 return _preferences.BatchUploadUrl;
             }
         }
+
+        public bool CheckIntervalEnabled
+        {
+            get { return _preferences.BatchUploadCheckIntervalEnabled; }
+        }
     }
 }

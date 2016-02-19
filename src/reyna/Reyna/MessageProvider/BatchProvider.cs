@@ -6,7 +6,7 @@
 
     internal class BatchProvider : IMessageProvider
     {
-        private const string PeriodicBackoutCheckTAG = "BatchProvider";
+        private const string PeriodicBackoutCheckTag = "BatchProvider";
 
         public BatchProvider(IRepository repository, IPeriodicBackoutCheck periodicBackoutCheck, IBatchConfiguration batchConfiguration)
         {
@@ -19,8 +19,11 @@
         {
             get
             {
-                long interval = (long)(BatchConfiguration.SubmitInterval * 0.9);
-                if (PeriodicBackoutCheck.IsTimeElapsed(PeriodicBackoutCheckTAG, interval))
+                var usePreferencesInterval = BatchConfiguration.CheckIntervalEnabled;
+
+                var interval = (long) (usePreferencesInterval ? BatchConfiguration.CheckInterval : BatchConfiguration.SubmitInterval * 0.9);
+
+                if (PeriodicBackoutCheck.IsTimeElapsed(PeriodicBackoutCheckTag, interval))
                 {
                     return true;
                 }
@@ -46,7 +49,7 @@
             var count = 0;
             long size = 0;
             long maxMessagesCount = BatchConfiguration.BatchMessageCount;
-            long maxBatchSize = BatchConfiguration.BatchMessagesSize;
+            var maxBatchSize = BatchConfiguration.BatchMessagesSize;
             while (message != null && count < maxMessagesCount && size < maxBatchSize)
             {
                 headers = message.Headers;
@@ -67,7 +70,11 @@
                 var lastMessage = batch.Events[batch.Events.Count - 1];
                 var batchMessage = new Message(GetBatchUploadUrl(lastMessage.Url), batch.ToJson());
                 batchMessage.Id = lastMessage.ReynaId;
-                for (int index = 0; index < headers.Count; index++)
+                if (headers == null)
+                {
+                    
+                }
+                for (var index = 0; index < headers.Count; index++)
                 {
                     batchMessage.Headers.Add(headers.Keys[index], headers[index]);
                 }
@@ -88,7 +95,7 @@
         {
             if (BatchDeleted)
             {
-                PeriodicBackoutCheck.Record(PeriodicBackoutCheckTAG);
+                PeriodicBackoutCheck.Record(PeriodicBackoutCheckTag);
             }
 
             BatchDeleted = false;
@@ -107,7 +114,7 @@
         private Uri GetUploadUrlFromMessageUrl(Uri uri)
         {
             var path = uri.AbsoluteUri;
-            int index = path.LastIndexOf("/");
+            var index = path.LastIndexOf("/");
             var batchPath = path.Substring(0, index) + "/batch";
             return new Uri(batchPath);
         }

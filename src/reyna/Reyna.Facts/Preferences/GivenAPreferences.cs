@@ -292,5 +292,88 @@ namespace Reyna.Facts
             Assert.False(Preferences.IsBlackoutRangeValid("13:00 - 21:00"));
             Assert.False(Preferences.IsBlackoutRangeValid("1300-21:00"));
         }
+
+        [Fact]
+        public void WhenSettingBatchUploadThenBatchUploadShouldReturnExpected()
+        {
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(1);
+
+            var batchUpload = Preferences.BatchUpload;
+
+            Assert.True(batchUpload);
+
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(0);
+
+            batchUpload = Preferences.BatchUpload;
+
+            Assert.False(batchUpload);
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            var batchUpload = Preferences.BatchUpload;
+
+            Assert.True(batchUpload);
+        }
+
+        [Fact]
+        public void WhenSettingBatchUploadUrlThenBatchUploadUrlShouldReturnExpected()
+        {
+            _mockRegistry.Setup(r => r.GetString(Registry.LocalMachine, @"Software\Reyna", "BatchUploadUri", string.Empty)).Returns("http://post.net/");
+            
+            var batchUploadUrl = Preferences.BatchUploadUrl;
+
+            Assert.Equal("http://post.net/", batchUploadUrl.ToString());
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadUrlAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            var batchUploadUrl = Preferences.BatchUploadUrl;
+
+            Assert.Null(batchUploadUrl);
+        }
+
+        [Fact]
+        public void WhenSettingBatchUploadCheckIntervalThenBatchUploadCheckIntervalShouldReturnExpected()
+        {
+            int twentyFourHours = 24*60*60*1000;
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", twentyFourHours)).Returns(100);
+
+            var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
+
+            Assert.Equal(100, batchUploadCheckInterval);
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadCheckIntervalAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            int twentyFourHours = 24 * 60 * 60 * 1000;
+
+            var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
+
+            Assert.Equal(twentyFourHours, batchUploadCheckInterval);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WhenSettingBatchUploadCheckIntervalEnabledThenBatchUploadCheckIntervalShouldReturnExpected(bool expected)
+        {
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadIntervalEnabled", 0)).Returns(expected?1:0);
+
+            var batchUploadCheckIntervalEnabled = Preferences.BatchUploadCheckIntervalEnabled;
+
+            Assert.Equal(expected, batchUploadCheckIntervalEnabled);
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadCheckIntervalEnabledAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            var batchUploadCheckIntervalEnabled = Preferences.BatchUploadCheckIntervalEnabled;
+
+            Assert.Equal(false, batchUploadCheckIntervalEnabled);
+        }
     }
 }

@@ -106,11 +106,15 @@ namespace Reyna
             Preferences.SetOffChargeBlackout(value);
         }
 
-        public void SetBatchUploadConfiguration(bool value, Uri url, long checkInterval)
+        public void SetBatchUploadConfiguration(bool value, Uri url, long interval)
         {
             Preferences.SaveBatchUpload(value);
             Preferences.SaveBatchUploadUrl(url);
-            Preferences.SaveBatchUploadCheckInterval(checkInterval);
+            Preferences.SaveBatchUploadInterval(interval);
+            if (interval >= 0)
+            {
+                Preferences.SaveBatchUploadIntervalEnabled(true);
+            }
         }
 
         public void Start()

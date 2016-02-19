@@ -6,13 +6,13 @@
     {
         public RegistryPeriodicBackoutCheck(IRegistry registry)
         {
-            this.Registry = registry;
-            this.PeriodicalTasksKeyName = @"Software\Reyna\PeriodicBackoutCheck";
+            Registry = registry;
+            PeriodicalTasksKeyName = @"Software\Reyna\PeriodicBackoutCheck";
         }
 
         public void SetPeriodicalTasksKeyName(string key)
         {
-            this.PeriodicalTasksKeyName = key;
+            PeriodicalTasksKeyName = key;
         }
 
         private IRegistry Registry { get; set; }
@@ -21,20 +21,20 @@
 
         public void Record(string task)
         {
-            long epocInMilliseconds = this.GetEpocInMilliSeconds();
-            this.Registry.SetQWord(Microsoft.Win32.Registry.LocalMachine, this.PeriodicalTasksKeyName, task, epocInMilliseconds);
+            var epocInMilliseconds = GetEpocInMilliSeconds();
+            Registry.SetQWord(Microsoft.Win32.Registry.LocalMachine, PeriodicalTasksKeyName, task, epocInMilliseconds);
         }
 
         public bool IsTimeElapsed(string task, long periodInMilliseconds)
         {
-            long lastCheckedTime = this.Registry.GetQWord(Microsoft.Win32.Registry.LocalMachine, this.PeriodicalTasksKeyName, task, 0);
-            long epocInMilliseconds = this.GetEpocInMilliSeconds();
+            var lastCheckedTime = Registry.GetQWord(Microsoft.Win32.Registry.LocalMachine, PeriodicalTasksKeyName, task, 0);
+            var epocInMilliseconds = GetEpocInMilliSeconds();
 
-            long elapsedPeriodInSeconds = epocInMilliseconds - lastCheckedTime;
+            var elapsedPeriodInSeconds = epocInMilliseconds - lastCheckedTime;
 
             if (lastCheckedTime > epocInMilliseconds)
             {
-                this.Record(task);
+                Record(task);
                 return true;
             }
 
@@ -43,7 +43,7 @@
 
         private long GetEpocInMilliSeconds()
         {
-            TimeSpan span = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Local);
+            var span = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Local);
             return (long)span.TotalMilliseconds;
         }
     }

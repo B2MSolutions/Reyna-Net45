@@ -41,17 +41,24 @@
         }
 
         [Fact]
-        public void BatchUploadUrlShouldReturnFronPreferences()
+        public void BatchUploadUrlShouldReturnFromPreferences()
         {
             _mockPreferences.Setup(p => p.BatchUploadUrl).Returns(new Uri("http://post2.net"));
             Assert.Equal("http://post2.net/", BatchConfiguration.BatchUrl.ToString());
         }
 
         [Fact]
-        public void CheckIntervalShouldReturnFronPreferences()
+        public void CheckIntervalShouldReturnFromPreferences()
         {
             _mockPreferences.Setup(p => p.BatchUploadCheckInterval).Returns(100);
             Assert.Equal(100, BatchConfiguration.CheckInterval);
+        }
+
+        [Fact]
+        public void CheckIntervalEnabledShouldReturnFromPreferences()
+        {
+            _mockPreferences.Setup(p => p.BatchUploadCheckIntervalEnabled).Returns(true);
+            Assert.Equal(true, BatchConfiguration.CheckIntervalEnabled);
         }
     }
 }

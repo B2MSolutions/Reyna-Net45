@@ -13,5 +13,7 @@
         long SubmitInterval { get; }
 
         Uri BatchUrl { get; }
+
+        bool CheckIntervalEnabled { get; }
     }
 }
