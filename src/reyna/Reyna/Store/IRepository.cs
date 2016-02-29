@@ -6,6 +6,12 @@
     {
         event EventHandler<EventArgs> MessageAdded;
 
+        long AvailableMessagesCount { get; }
+
+        IMessage GetNextMessageAfter(long messageId);
+
+        void DeleteMessagesFrom(IMessage message);
+
         void Initialise();
 
         void Add(IMessage message);

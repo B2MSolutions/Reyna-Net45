@@ -17,6 +17,8 @@
             public static readonly string FORWARD_WAIT_HANDLE = "ForwardWaitHandle";
             public static readonly string STORE_SERVICE = "StoreService";
             public static readonly string FORWARD_SERVICE = "ForwardService";
+            public static readonly string BATCH_PROVIDER = "BatchProvider";
+            public static readonly string MESSAGE_PROVIDER = "MessageProvider";
         }
     }
 }

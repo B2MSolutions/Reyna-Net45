@@ -21,6 +21,7 @@
         private const string BatchUploadKeyName = "BatchUpload";
         private const string BatchUploadUriKeyName = "BatchUploadUri";
         private const string BatchUploadIntervalKeyName = "BatchUploadInterval";
+        private const string BatchUploadIntervalEnabledKeyName = "BatchUploadIntervalEnabled";
 
         public Preferences(IRegistry registry)
         {
@@ -92,6 +93,45 @@
             }
         }
 
+        public bool BatchUpload
+        {
+            get
+            {
+                return GetRegistryValue(BatchUploadKeyName, true);
+            }
+        }
+
+        public Uri BatchUploadUrl
+        {
+            get
+            {
+                var url = GetRegistryValue(BatchUploadUriKeyName, string.Empty);
+                if (string.IsNullOrEmpty(url))
+                {
+                    return null;
+                }
+
+                return new Uri(url);
+            }
+        }
+
+        public long BatchUploadCheckInterval
+        {
+            get
+            {
+                long sixHours = 6 * 60 * 60 * 1000;
+                return GetRegistryValue(BatchUploadIntervalKeyName, sixHours);
+            }
+        }
+
+        public bool BatchUploadCheckIntervalEnabled
+        {
+            get
+            {
+                return GetRegistryValue(BatchUploadIntervalEnabledKeyName, false);
+            }
+        }
+
         public int ForwardServiceTemporaryErrorBackout
         {
             get
@@ -136,7 +176,7 @@
             }
             else
             {
-                this.ResetWlanBlackoutRange();
+                ResetWlanBlackoutRange();
             }
         }
 
@@ -153,7 +193,7 @@
             }
             else
             {
-                this.ResetWwanBlackoutRange();
+                ResetWwanBlackoutRange();
             }
         }
 
@@ -238,12 +278,17 @@
         {
             SetRegistryValue(BatchUploadUriKeyName, url.ToString());
         }
-
-        public void SaveBatchUploadCheckInterval(long checkInterval)
-        {
-            SetRegistryValue(BatchUploadIntervalKeyName, checkInterval);
-        }
         
+        public void SaveBatchUploadInterval(long interval)
+        {
+            SetRegistryValue(BatchUploadIntervalKeyName, interval);
+        }
+
+        public void SaveBatchUploadIntervalEnabled(bool enabled)
+        {
+            SetRegistryValue(BatchUploadIntervalEnabledKeyName, enabled);
+        }
+
         public void SetStorageSizeLimit(long limit)
         {
             SetRegistryValue(StorageSizeLimitKeyName, limit);
@@ -302,37 +347,6 @@
         private static object ZeroPad(int numToPad)
         {
             return numToPad.ToString("D2");
-        }
-
-        public bool BatchUpload
-        {
-            get
-            {
-                return GetRegistryValue(BatchUploadKeyName, true);
-            }
-        }
-
-        public Uri BatchUploadUrl
-        {
-            get
-            {
-                var url = GetRegistryValue(BatchUploadUriKeyName, string.Empty);
-                if (string.IsNullOrEmpty(url))
-                {
-                    return null;
-                }
-
-                return new Uri(url);
-            }
-        }
-
-        public long BatchUploadCheckInterval
-        {
-            get
-            {
-                long sixHours = 6 * 60 * 60 * 1000;
-                return GetRegistryValue(BatchUploadIntervalKeyName, sixHours);
-            }
         }
     }
 }

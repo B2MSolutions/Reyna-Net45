@@ -1,64 +1,83 @@
-﻿
-namespace Reyna
+﻿namespace Reyna
 {
     using System;
     using System.Threading;
-    using Reyna.Interfaces;
+    using Interfaces;
 
     internal sealed class ForwardService : ServiceBase, IForwardService
     {
+        private const string PeriodicBackoutCheckTag = "ForwardService";
+        private bool _snoozing;
+        private readonly IBatchConfiguration _batchConfiguration;
+
         internal int TemporaryErrorMilliseconds { get; set; }
         internal int SleepMilliseconds { get; set; }
         internal IHttpClient HttpClient { get; set; }
         internal INetworkStateService NetworkState { get; set; }
-        internal IReynaLogger Logger { get; set; }
+        private IReynaLogger Logger { get; set; }
+        internal IMessageProvider MessageProvider { get; set; }
+        private IPeriodicBackoutCheck PeriodicBackoutCheck { get; set; }
 
-        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger)
+        public ForwardService(IAutoResetEventAdapter waitHandle, IReynaLogger logger, IBatchConfiguration batchConfiguration, IPeriodicBackoutCheck periodicBackoutCheck)
             : base(waitHandle, true)
         {
             Logger = logger;
+            _batchConfiguration = batchConfiguration;
+            PeriodicBackoutCheck = periodicBackoutCheck;
         }
-        
-        private bool _snoozing;
 
         protected override void ThreadStart()
         {
-            while (!this.Terminate)
+            while (!Terminate)
             {
-                this.DoWork();
+                DoWork();
             }
         }
 
         internal void DoWork()
         {
-            this.WaitHandle.WaitOne();
-            IMessage message = null;
+            WaitHandle.WaitOne();
             Logger.Info("Reyna.ForwardService DoWork enter");
-            while (!this.Terminate && !_snoozing && (message = this.SourceStore.Get()) != null)
+
+            if (CanSend)
             {
-                var result = this.HttpClient.Post(message);
-                if (result == Result.TemporaryError)
+                IMessage message;
+                while (!Terminate && !_snoozing && (message = MessageProvider.GetNext()) != null)
                 {
-                    // Schedule a retry, after a suitable snooze.
+                    var result = HttpClient.Post(message);
+                    if (result == Result.TemporaryError)
+                    {
+                        // Schedule a retry, after a suitable snooze.
 
-                    _snoozing = true;
+                        _snoozing = true;
 
-                    var timer = new System.Timers.Timer{ AutoReset = false, Enabled = true, Interval = this.TemporaryErrorMilliseconds };
-                    timer.Elapsed += (source, args) => { _snoozing = false; this.WaitHandle.Set(); };
+                        var timer = new System.Timers.Timer
+                        {
+                            AutoReset = false,
+                            Enabled = true,
+                            Interval = TemporaryErrorMilliseconds
+                        };
+                        timer.Elapsed += (source, args) =>
+                        {
+                            _snoozing = false;
+                            WaitHandle.Set();
+                        };
 
-                    break;
+                        break;
+                    }
+
+                    if (result == Result.Blackout || result == Result.NotConnected)
+                    {
+                        break;
+                    }
+
+                    MessageProvider.Delete(message);
+                    Thread.Sleep(SleepMilliseconds);
                 }
 
-                if (result == Result.Blackout || result == Result.NotConnected)
-                {
-                    break;
-                }
-
-                this.SourceStore.Remove();
-                Thread.Sleep(this.SleepMilliseconds);
+                MessageProvider.Close();
             }
-
-            this.WaitHandle.Reset();
+            WaitHandle.Reset();
             Logger.Info("Reyna.ForwardService DoWork exit");
         }
 
@@ -66,16 +85,16 @@ namespace Reyna
         {
             Logger.Info("Reyna.ForwardService OnNetworkConnected");
            
-            if (this.Terminate)
+            if (Terminate)
             {
                 return;
             }
 
-            this.SignalWorkToDo();
+            SignalWorkToDo();
         }
 
         public void Initialize(IRepository sourceStore, IHttpClient httpClient, INetworkStateService networkState, 
-            int temporaryErrorMilliseconds, int sleepMilliseconds)
+            int temporaryErrorMilliseconds, int sleepMilliseconds, bool batchUpload)
         {
             Logger.Info("Reyna.ForwardService Initialize enter");
          
@@ -89,17 +108,35 @@ namespace Reyna
                 throw new ArgumentNullException("networkState");
             }
 
-            this.HttpClient = httpClient;
-            this.NetworkState = networkState;
+            HttpClient = httpClient;
+            NetworkState = networkState;
 
-            this.TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
-            this.SleepMilliseconds = sleepMilliseconds;
+            TemporaryErrorMilliseconds = temporaryErrorMilliseconds;
+            SleepMilliseconds = sleepMilliseconds;
 
-            this.NetworkState.NetworkConnected += this.OnNetworkConnected;
+            NetworkState.NetworkConnected += OnNetworkConnected;
+            PeriodicBackoutCheck.SetPeriodicalTasksKeyName(@"Software\Reyna\PeriodicBackoutCheck");
 
-            base.Initialize(sourceStore);
+            if (batchUpload)
+            {
+                MessageProvider = new BatchProvider(sourceStore, PeriodicBackoutCheck, _batchConfiguration);
+            }
+            else
+            {
+                MessageProvider = new MessageProvider(sourceStore);
+            }
+
+            Initialize(sourceStore);
 
             Logger.Info("Reyna.ForwardService Initialize exit");
+        }
+
+        private bool CanSend
+        {
+            get
+            {
+                return MessageProvider.CanSend && PeriodicBackoutCheck.IsTimeElapsed(PeriodicBackoutCheckTag, TemporaryErrorMilliseconds);
+            }
         }
     }
 }

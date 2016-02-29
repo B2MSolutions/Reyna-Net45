@@ -293,70 +293,88 @@ namespace Reyna.Facts
             Assert.False(Preferences.IsBlackoutRangeValid("13:00 - 21:00"));
             Assert.False(Preferences.IsBlackoutRangeValid("1300-21:00"));
         }
-        
-        [Theory,
-        InlineData(true),
-        InlineData(false)]
-        public void WhenCallingSaveBatchUpoadShouldSetRegistryValue(bool value)
-        {
-            Preferences.SaveBatchUpload(value);
-            _mockRegistry.Verify(r => r.SetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", value ? 1 : 0));
-        }
 
-        [Theory,
-        InlineData(122),
-        InlineData(123456)]
-        public void WhenCallingSaveBatchUpoadCheckIntervalShouldSetRegistryValue(long value)
+        [Fact]
+        public void WhenSettingBatchUploadThenBatchUploadShouldReturnExpected()
         {
-            Preferences.SaveBatchUploadCheckInterval(value);
-            _mockRegistry.Verify(r => r.SetQWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", value));
-        }
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(1);
 
-        [Theory,
-        InlineData("http://url1.com"),
-        InlineData("http://url2.com")]
-        public void WhenCallingSaveBatchUpoadUrlShouldSetRegistryValue(string value)
-        {
-            Uri uri = new Uri(value);
-            Preferences.SaveBatchUploadUrl(uri);
-            _mockRegistry.Verify(r => r.SetString(Registry.LocalMachine, @"Software\Reyna", "BatchUploadUri", uri.ToString()));
-        }
+            var batchUpload = Preferences.BatchUpload;
 
-        [Theory,
-        InlineData(true),
-        InlineData(false)]
-        public void WhenCallingBatchUploadShouldReturnCorrectValue(bool value)
-        {
-            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 1)).Returns(value ? 1 : 0);
-            Assert.Equal(value, Preferences.BatchUpload);
-        }
+            Assert.True(batchUpload);
 
-        [Theory,
-        InlineData(122),
-        InlineData(123456)]
-        public void WhennCallingBatchUploadIntervalShouldReturnCorrectValue(long value)
-        {
-            long sixHours = 6 * 60 * 60 * 1000;
-            _mockRegistry.Setup(r => r.GetQWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", sixHours)).Returns(value);
-            Assert.Equal(value, Preferences.BatchUploadCheckInterval);
-        }
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(0);
 
-        [Theory,
-        InlineData("http://url1.com"),
-        InlineData("http://url2.com")]
-        public void WhenCallingBatchUpoadUrlShouldReturnCorrectValue(string value)
-        {
-            Uri uri = new Uri(value);
-            _mockRegistry.Setup(r => r.GetString(Registry.LocalMachine, @"Software\Reyna", "BatchUploadUri", string.Empty)).Returns(value);
-            var result = Preferences.BatchUploadUrl;
-            Assert.Equal(uri.ToString(), result.ToString());
+            batchUpload = Preferences.BatchUpload;
+
+            Assert.False(batchUpload);
         }
 
         [Fact]
-        public void WhenCallingBatchUploadUriAndNoStringReturnedShouldReturnNull()
+        public void WhenGettingBatchUploadAndBatchUploadNeverSavedShouldReturnDefaults()
         {
-            _mockRegistry.Setup(r => r.GetString(Registry.LocalMachine, @"Software\Reyna", "BatchUploadUri", string.Empty)).Returns(String.Empty);
-            Assert.Null(Preferences.BatchUploadUrl);
+            var batchUpload = Preferences.BatchUpload;
+
+            Assert.True(batchUpload);
+        }
+
+        [Fact]
+        public void WhenSettingBatchUploadUrlThenBatchUploadUrlShouldReturnExpected()
+        {
+            _mockRegistry.Setup(r => r.GetString(Registry.LocalMachine, @"Software\Reyna", "BatchUploadUri", string.Empty)).Returns("http://post.net/");
+            
+            var batchUploadUrl = Preferences.BatchUploadUrl;
+
+            Assert.Equal("http://post.net/", batchUploadUrl.ToString());
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadUrlAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            var batchUploadUrl = Preferences.BatchUploadUrl;
+
+            Assert.Null(batchUploadUrl);
+        }
+
+        [Fact]
+        public void WhenSettingBatchUploadCheckIntervalThenBatchUploadCheckIntervalShouldReturnExpected()
+        {
+            int twentyFourHours = 24*60*60*1000;
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", twentyFourHours)).Returns(100);
+
+            var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
+
+            Assert.Equal(100, batchUploadCheckInterval);
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadCheckIntervalAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            int twentyFourHours = 24 * 60 * 60 * 1000;
+
+            var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
+
+            Assert.Equal(twentyFourHours, batchUploadCheckInterval);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WhenSettingBatchUploadCheckIntervalEnabledThenBatchUploadCheckIntervalShouldReturnExpected(bool expected)
+        {
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadIntervalEnabled", 0)).Returns(expected?1:0);
+
+            var batchUploadCheckIntervalEnabled = Preferences.BatchUploadCheckIntervalEnabled;
+
+            Assert.Equal(expected, batchUploadCheckIntervalEnabled);
+        }
+
+        [Fact]
+        public void WhenGettingBatchUploadCheckIntervalEnabledAndBatchUploadNeverSavedShouldReturnDefaults()
+        {
+            var batchUploadCheckIntervalEnabled = Preferences.BatchUploadCheckIntervalEnabled;
+
+            Assert.Equal(false, batchUploadCheckIntervalEnabled);
         }
     }
 }
