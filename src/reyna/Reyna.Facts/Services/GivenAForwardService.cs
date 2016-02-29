@@ -27,6 +27,8 @@
             _periodicBackoutCheck = new Mock<IPeriodicBackoutCheck>();
             var loggerMock = new Mock<IReynaLogger>();
 
+            _periodicBackoutCheck.Setup(pbc => pbc.IsTimeElapsed("ForwardService", It.IsAny<long>())).Returns(true);
+
             _service = new ForwardService(_waitHandle.Object, loggerMock.Object, _batchConfiguration.Object, _periodicBackoutCheck.Object);
         }
 
@@ -94,13 +96,15 @@
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
 
-            _persistentStore.Setup(v => v.Get()).Returns(() => GetMessage(messages));
-            _persistentStore.Setup(v => v.Remove()).Callback(() => RemoveMessage(messages, message));
+            var messageProvider = new Mock<IMessageProvider>();
+            messageProvider.Setup(mp => mp.CanSend).Returns(true);
+            messageProvider.SetupSequence(mp => mp.GetNext()).Returns(message).Returns(null);
+            _service.MessageProvider = messageProvider.Object;
 
             _service.DoWork();
 
             _httpClient.Verify(h => h.Post(message), Times.Exactly(1));
-            Assert.Equal(0, messages.Count);
+            messageProvider.Verify(mp => mp.Delete(message));
         }
 
         [Fact]
@@ -109,6 +113,11 @@
             _service.Initialize(_persistentStore.Object, _httpClient.Object, _networkStateService.Object, 1, 1, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
+
+            var messageProvider = new Mock<IMessageProvider>();
+            messageProvider.Setup(mp => mp.CanSend).Returns(true);
+            messageProvider.SetupSequence(mp => mp.GetNext()).Returns(message).Returns(null);
+            _service.MessageProvider = messageProvider.Object;
 
             _persistentStore.Setup(v => v.Get()).Returns(() => GetMessage(messages));
             _persistentStore.Setup(v => v.Remove()).Callback(() => RemoveMessage(messages, message));
@@ -119,7 +128,7 @@
             _httpClient.Verify(h => h.Post(message), Times.Exactly(1));
             _waitHandle.Verify(w => w.Reset(), Times.Exactly(1));
             _persistentStore.Verify(p => p.Remove(), Times.Never);
-            Assert.Equal(1, messages.Count);
+            messageProvider.Verify(mp => mp.Delete(message), Times.Never);
         }
 
         [Fact]
@@ -128,6 +137,11 @@
             _service.Initialize(_persistentStore.Object, _httpClient.Object, _networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
+
+            var messageProvider = new Mock<IMessageProvider>();
+            messageProvider.Setup(mp => mp.CanSend).Returns(true);
+            messageProvider.SetupSequence(mp => mp.GetNext()).Returns(message).Returns(null);
+            _service.MessageProvider = messageProvider.Object;
 
             _persistentStore.Setup(v => v.Get()).Returns(() => GetMessage(messages));
             _persistentStore.Setup(v => v.Remove()).Callback(() => RemoveMessage(messages, message));
@@ -138,7 +152,7 @@
             _httpClient.Verify(h => h.Post(message), Times.Exactly(1));
             _waitHandle.Verify(w => w.Reset(), Times.Exactly(1));
             _persistentStore.Verify(p => p.Remove(), Times.Never);
-            Assert.Equal(1, messages.Count);
+            messageProvider.Verify(mp => mp.Delete(message), Times.Never);
         }
 
         [Fact]
@@ -147,6 +161,11 @@
             _service.Initialize(_persistentStore.Object, _httpClient.Object, _networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
+
+            var messageProvider = new Mock<IMessageProvider>();
+            messageProvider.Setup(mp => mp.CanSend).Returns(true);
+            messageProvider.SetupSequence(mp => mp.GetNext()).Returns(message).Returns(null);
+            _service.MessageProvider = messageProvider.Object;
 
             _persistentStore.Setup(v => v.Get()).Returns(() => GetMessage(messages));
             _persistentStore.Setup(v => v.Remove()).Callback(() => RemoveMessage(messages, message));
@@ -157,7 +176,7 @@
             _httpClient.Verify(h => h.Post(message), Times.Exactly(1));
             _waitHandle.Verify(w => w.Reset(), Times.Exactly(1));
             _persistentStore.Verify(p => p.Remove(), Times.Never);
-            Assert.Equal(1, messages.Count);
+            messageProvider.Verify(mp => mp.Delete(message), Times.Never);
         }
 
         [Fact]
@@ -166,6 +185,10 @@
             _service.Initialize(_persistentStore.Object, _httpClient.Object, _networkStateService.Object, 0, 0, false);
             Message message = new Message(new Uri("http://google.com"), "MessageBody");
             List<IMessage> messages = new List<IMessage> { message };
+
+            var messageProvider = new Mock<IMessageProvider>();
+            messageProvider.Setup(mp => mp.CanSend).Returns(true);
+            _service.MessageProvider = messageProvider.Object;
 
             _persistentStore.Setup(v => v.Get()).Returns(() => GetMessage(messages));
             _persistentStore.Setup(v => v.Remove()).Callback(() => RemoveMessage(messages, message));

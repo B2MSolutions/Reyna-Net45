@@ -259,7 +259,7 @@
         [Fact]
         public void WhenCallingPutShouldCallVolatileStore()
         {
-            IMessage message = new Message(new System.Uri("http://testuri.com"), "body");
+            IMessage message = new Message(new Uri("http://testuri.com"), "body");
             service.Put(message);
             volatileStore.Verify(s => s.Add(message), Times.Exactly(1));
         }
