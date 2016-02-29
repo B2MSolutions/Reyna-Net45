@@ -297,13 +297,13 @@ namespace Reyna.Facts
         [Fact]
         public void WhenSettingBatchUploadThenBatchUploadShouldReturnExpected()
         {
-            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(1);
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 1)).Returns(1);
 
             var batchUpload = Preferences.BatchUpload;
 
             Assert.True(batchUpload);
 
-            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 0)).Returns(0);
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 1)).Returns(0);
 
             batchUpload = Preferences.BatchUpload;
 
@@ -313,6 +313,8 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGettingBatchUploadAndBatchUploadNeverSavedShouldReturnDefaults()
         {
+            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUpload", 1)).Returns(1);
+
             var batchUpload = Preferences.BatchUpload;
 
             Assert.True(batchUpload);
@@ -339,8 +341,8 @@ namespace Reyna.Facts
         [Fact]
         public void WhenSettingBatchUploadCheckIntervalThenBatchUploadCheckIntervalShouldReturnExpected()
         {
-            int twentyFourHours = 24*60*60*1000;
-            _mockRegistry.Setup(r => r.GetDWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", twentyFourHours)).Returns(100);
+            long sixHours = 6*60*60*1000;
+            _mockRegistry.Setup(r => r.GetQWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", sixHours)).Returns(100);
 
             var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
 
@@ -350,11 +352,12 @@ namespace Reyna.Facts
         [Fact]
         public void WhenGettingBatchUploadCheckIntervalAndBatchUploadNeverSavedShouldReturnDefaults()
         {
-            int twentyFourHours = 24 * 60 * 60 * 1000;
+            long sixHours = 6 * 60 * 60 * 1000;
+            _mockRegistry.Setup(r => r.GetQWord(Registry.LocalMachine, @"Software\Reyna", "BatchUploadInterval", sixHours)).Returns(sixHours);
 
             var batchUploadCheckInterval = Preferences.BatchUploadCheckInterval;
 
-            Assert.Equal(twentyFourHours, batchUploadCheckInterval);
+            Assert.Equal(sixHours, batchUploadCheckInterval);
         }
 
         [Theory]
