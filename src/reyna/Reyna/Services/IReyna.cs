@@ -16,5 +16,6 @@ namespace Reyna.Interfaces
         void ResetStorageSizeLimit();
         long StorageSizeLimit { get; }
         void SetBatchUploadConfiguration(bool value, Uri url, long checkInterval);
+        void ResumeForwardService();
     }
 }
