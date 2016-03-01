@@ -300,5 +300,15 @@
             preferences.Verify(p => p.SaveBatchUploadInterval(123456));
             preferences.Verify(p => p.SaveBatchUploadUrl(uri));
         }
+
+        [Fact]
+        public void WhenCallingResumeForwardServiceShouldCallResume()
+        {
+            forwardService.Setup(f => f.Resume());
+
+            service.ResumeForwardService();
+
+            forwardService.Verify(f => f.Resume(), Times.Once());
+        }
     }
 }

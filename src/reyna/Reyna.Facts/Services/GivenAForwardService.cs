@@ -217,6 +217,14 @@
             _waitHandle.Verify(w => w.Set(), Times.Never());
         }
 
+        [Fact]
+        public void WhenCallingResumeShouldSignalWorkToDo()
+        {
+            _service.Resume();
+
+            _waitHandle.Verify(wh => wh.Set(), Times.Once);
+        }
+
         private void RemoveMessage(List<IMessage> messages, IMessage message)
         {
             messages.Remove(message);

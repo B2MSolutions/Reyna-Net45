@@ -138,5 +138,10 @@
                 return MessageProvider.CanSend && PeriodicBackoutCheck.IsTimeElapsed(PeriodicBackoutCheckTag, TemporaryErrorMilliseconds);
             }
         }
+
+        public void Resume()
+        {
+            SignalWorkToDo();
+        }
     }
 }

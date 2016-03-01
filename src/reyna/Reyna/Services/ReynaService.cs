@@ -175,5 +175,13 @@ namespace Reyna
                 StoreService.Dispose();
             }
         }
+
+        public void ResumeForwardService()
+        {
+            if (ForwardService != null)
+            {
+                ForwardService.Resume();
+            }
+        }
     }
 }
