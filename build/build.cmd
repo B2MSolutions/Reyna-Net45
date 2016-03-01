@@ -6,5 +6,5 @@ IF [%1]==[] (
 ) ELSE (
 	echo Using build number [%1]
 
-	C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe Build\build.proj /p:BuildNumber="%1" /m /nr:false 
+	C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe Build\build.proj /p:Configuration="Release" /p:BuildNumber="%1" /m /nr:false 
 )
