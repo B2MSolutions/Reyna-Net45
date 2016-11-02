@@ -100,8 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blackout\GivenABlackoutTime.cs" />
-    <Compile Include="Blackout\GivenATime.cs" />
-    <Compile Include="Blackout\GivenATimeRange.cs" />
+    <Compile Include="System\GivenATime.cs" />
+    <Compile Include="System\GivenATimeRange.cs" />
     <Compile Include="Connection\GivenAConnectionInfo.cs" />
     <Compile Include="Connection\GivenAConnectionManager.cs" />
     <Compile Include="GivenAUnityHelper.cs" />

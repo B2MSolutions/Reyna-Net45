@@ -82,8 +82,9 @@
   <ItemGroup>
     <Compile Include="Blackout\BlackoutTime.cs" />
     <Compile Include="Blackout\IBlackoutTime.cs" />
-    <Compile Include="Blackout\Time.cs" />
-    <Compile Include="Blackout\TimeRange.cs" />
+    <Compile Include="System\ITime.cs" />
+    <Compile Include="System\Time.cs" />
+    <Compile Include="System\TimeRange.cs" />
     <Compile Include="Connection\ConnectionInfo.cs" />
     <Compile Include="Connection\ConnectionManager.cs" />
     <Compile Include="Connection\IConnectionInfo.cs" />

@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class Time : IComparable<Time>
+    public class Time : IComparable<Time>, ITime
     {
         public Time(int hour, int minute)
         {
@@ -39,6 +39,11 @@
             }
 
             return this.MinuteOfDay < other.MinuteOfDay ? -1 : 1;
+        }
+
+        public long GetTimeInMilliseconds()
+        {
+            return DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
         }
     }
 }

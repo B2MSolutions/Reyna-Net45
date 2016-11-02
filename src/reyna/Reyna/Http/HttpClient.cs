@@ -1,25 +1,22 @@
-﻿
+﻿using Reyna.Interfaces;
+using System;
+
 namespace Reyna
 {
-    using System;
-    using System.Net;
-    using System.Runtime.InteropServices;
-    using System.Text;    
-    using Extensions;
-    using Reyna.Interfaces;
-    using Reyna.Power;
-
     public sealed class HttpClient : IHttpClient
     {
         public IConnectionManager ConnectionManager { get; set; }
-        private IWebRequest webRequest;
-        private IReynaLogger Logger;
+        private IWebRequest _webRequest;
+        private IReynaLogger _logger;
+        private ITime _time;
 
-        public HttpClient(IConnectionManager connectionManager, IWebRequest webRequest, IReynaLogger logger)
+        public HttpClient(IConnectionManager connectionManager, IWebRequest webRequest, 
+            IReynaLogger logger, ITime time)
         {
             this.ConnectionManager = connectionManager;
-            this.webRequest = webRequest;
-            Logger = logger;
+            _webRequest = webRequest;
+            _logger = logger;
+            _time = time;
         }
 
         public Result CanSend()
@@ -31,17 +28,17 @@ namespace Reyna
         {
             try
             {
-                Logger.Info("Reyna.HttpClient Post id {0} url {1} body length {2}", message.Id,message.Url,message.Body.Length);
+                _logger.Info("Reyna.HttpClient Post id {0} url {1} body length {2}", message.Id,message.Url,message.Body.Length);
 
                 Result result = CanSend();
                 if (result != Result.Ok)
                 {
-                    Logger.Info("Reyna.HttpClient Post cannot send: {0}", result.ToString());
+                    _logger.Info("Reyna.HttpClient Post cannot send: {0}", result.ToString());
                     return result;
                 }
 
-                this.webRequest.CreateRequest(message.Url);
-                this.webRequest.Method = "POST";
+                _webRequest.CreateRequest(message.Url);
+                _webRequest.Method = "POST";
 
                 foreach (string key in message.Headers.Keys)
                 {
@@ -49,20 +46,22 @@ namespace Reyna
 
                     if (key == "content-type")
                     {
-                        this.webRequest.ContentType = value;
+                        _webRequest.ContentType = value;
                         continue;
                     }
 
-                    this.webRequest.AddHeader(key, value);
+                    _webRequest.AddHeader(key, value);
                 }
 
-                Logger.Info("Reyna.HttpClient Post can send: {0}", result.ToString());
+                _webRequest.AddHeader("submitted", _time.GetTimeInMilliseconds().ToString());
 
-                return this.webRequest.Send(message.Body);
+                _logger.Info("Reyna.HttpClient Post can send: {0}", result.ToString());
+
+                return _webRequest.Send(message.Body);
             }
             catch (Exception e)
             {
-                Logger.Error("Reyna.HttpClient Post {0}",e);
+                _logger.Error("Reyna.HttpClient Post {0}",e);
                
                 return Result.PermanentError;
             }
