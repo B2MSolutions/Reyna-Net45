@@ -53,7 +53,11 @@ namespace Reyna
                     _webRequest.AddHeader(key, value);
                 }
 
-                _webRequest.AddHeader("submitted", _time.GetTimeInMilliseconds().ToString());
+                string timeInMillis = _time.GetTimeInMilliseconds().ToString();
+
+                _webRequest.AddHeader("submitted", timeInMillis);
+
+                _logger.Info("Reyna.HttpClient message time sent is {0}", timeInMillis);
 
                 _logger.Info("Reyna.HttpClient Post can send: {0}", result.ToString());
 
