@@ -35,6 +35,7 @@ namespace Reyna
             container.RegisterType<IPeriodicBackoutCheck, RegistryPeriodicBackoutCheck>();
             container.RegisterType<IMessageProvider, BatchProvider>(Constants.Injection.BATCH_PROVIDER);
             container.RegisterType<IMessageProvider, MessageProvider>(Constants.Injection.MESSAGE_PROVIDER);
+            container.RegisterType<ITime, Time>();
 
             container.RegisterInstance<IReynaLogger>(new ReynaLogger());
 

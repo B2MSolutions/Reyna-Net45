@@ -45,8 +45,9 @@ namespace Reyna.Facts
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IPeriodicBackoutCheck) && r.MappedToType == typeof(RegistryPeriodicBackoutCheck)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMessageProvider) && r.MappedToType == typeof(BatchProvider)));
             Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(IMessageProvider) && r.MappedToType == typeof(MessageProvider)));
+            Assert.NotNull(container.Registrations.FirstOrDefault(r => r.RegisteredType == typeof(ITime) && r.MappedToType == typeof(Time)));
 
-            Assert.Equal(27, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
+            Assert.Equal(28, container.Registrations.Count()); // Always 1 ahead due to the default lifetime manager registration
         }
     }
 }

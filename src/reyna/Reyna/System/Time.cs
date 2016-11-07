@@ -1,8 +1,9 @@
-﻿namespace Reyna
-{
-    using System;
+﻿using Microsoft.Practices.Unity;
+using System;
 
-    public class Time : IComparable<Time>
+namespace Reyna
+{
+    public class Time : IComparable<Time>, ITime
     {
         public Time(int hour, int minute)
         {
@@ -24,6 +25,7 @@
             this.MinuteOfDay = minuteOfDay;
         }
 
+        [InjectionConstructor]
         public Time()
         {
             this.MinuteOfDay = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
@@ -39,6 +41,13 @@
             }
 
             return this.MinuteOfDay < other.MinuteOfDay ? -1 : 1;
+        }
+
+        public long GetTimeInMilliseconds()
+        {
+            TimeSpan span = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
+            return (long)span.TotalMilliseconds;
         }
     }
 }
