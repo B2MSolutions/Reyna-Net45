@@ -23,7 +23,7 @@
     <MSBuild Projects= "$(Src)\reyna\reyna.sln"  Targets="Clean" />
   </Target>
 
-  <Target Name="compile" DependsOnTargets="clean">
+  <Target Name="compile" DependsOnTargets="clean;incrementVersion">
     <Message Text="Compiling..."/>
     <MSBuild Projects= "$(Src)\reyna\reyna.sln"  StopOnFirstFailure="true" Targets="Build" />
   </Target>
